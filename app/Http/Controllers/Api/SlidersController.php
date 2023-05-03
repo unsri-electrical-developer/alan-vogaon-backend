@@ -107,6 +107,14 @@ class SlidersController extends ApiController
      */
     public function destroy($id)
     {
-        //
+        $slider = Sliders::where('id', $id)->first();
+        
+        if (!$slider) {
+            return $this->sendError(1, "Data tidak ditemukan", []);
+        }
+        
+        $slider->delete();
+        
+        return $this->sendResponse(0, "Sukses", []);
     }
 }
