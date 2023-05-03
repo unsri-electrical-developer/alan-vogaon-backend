@@ -26,14 +26,22 @@ class GamesController extends ApiController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $games = Games::with('category:category_name,category_code')->get([
-            'title',
-            'code',
-            'img',
-            'category_code'
-        ]);
+        $games = Games::with('category:category_name,category_code')
+            ->when($request->has('search'), function ($query) use ($request) {
+                $query->where('title', 'like', '%' . $request->search . '%');
+            })
+            ->when($request->has('category_code'), function ($query) use ($request) {
+                $query->where('category_code', $request->category_code);
+            })
+            ->get([
+                'title',
+                'code',
+                'img',
+                'category_code'
+            ]);
+            
         return $this->sendResponse(0, "Sukses", $games);
     }
 
