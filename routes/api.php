@@ -24,5 +24,8 @@ Route::group(['prefix' => 'v1', 'middleware' => 'auth:sanctum'], function () {
     });
 
     Route::post('/logout', [AuthController::class, 'logout']);
+    
+    // Users
+    Route::apiResource('/users', UserController::class);
 
 });
