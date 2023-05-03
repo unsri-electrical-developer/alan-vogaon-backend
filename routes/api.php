@@ -34,4 +34,7 @@ Route::group(['prefix' => 'v1', 'middleware' => 'auth:sanctum'], function () {
     // Games
     Route::apiResource('/games', GamesController::class);
 
+    // Sliders
+    Route::apiResource('/sliders', SlidersController::class);
+    
 });
