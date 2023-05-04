@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\GamesController;
 use App\Http\Controllers\Api\GamesItemController;
 use App\Http\Controllers\Api\HomeController;
+use App\Http\Controllers\Api\PaymentGatewayController;
 use App\Http\Controllers\Api\SlidersController;
 use App\Http\Controllers\Api\TestController;
 use App\Http\Controllers\Api\UserController;
@@ -40,4 +41,7 @@ Route::group(['prefix' => 'v1', 'middleware' => 'auth:sanctum'], function () {
     
     // Games Item / Products
     Route::apiResource('/games_item/{game_code}/products', GamesItemController::class);
+
+    // Payment Gateway
+    Route::apiResource('/payment_gateway', PaymentGatewayController::class);
 });
