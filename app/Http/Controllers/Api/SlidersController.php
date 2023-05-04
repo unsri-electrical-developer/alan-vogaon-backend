@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Games;
 use App\Models\Sliders;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class SlidersController extends ApiController
@@ -108,7 +109,14 @@ class SlidersController extends ApiController
         if (!$slider) {
             return $this->sendError(1, "Data tidak ditemukan", []);
         }
-        $slider->image = $request->image;
+
+        if (Storage::exists('public' . $slider->image)) {
+            Storage::delete('public' . $slider->image);
+        }
+
+        $img_path = uploadFotoWithFileName($request->image, 'SLIDERS', '/sliders');
+
+        $slider->image = $img_path;
 
         $slider->save();
         return $this->sendResponse(0, "Sukses", []);
@@ -129,6 +137,10 @@ class SlidersController extends ApiController
         }
         
         $slider->delete();
+
+        if (Storage::exists('public' . $slider->image)) {
+            Storage::delete('public' . $slider->image);
+        }
         
         return $this->sendResponse(0, "Sukses", []);
     }

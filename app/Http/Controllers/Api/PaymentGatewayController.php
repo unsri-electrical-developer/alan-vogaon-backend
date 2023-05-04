@@ -54,7 +54,11 @@ class PaymentGatewayController extends ApiController
         }
         
         $validated = $validator->validated();
-        $pg_code = generateFiledCode('PG');
+        $pg_code = normalizeString($request->pg_name);
+        $check_pg_code = PaymentGateway::where('pg_code', $pg_code)->first();
+        if ($check_pg_code) {
+            return $this->sendError(1, "Gagal menambah data!", ["Payment gateway dengan kode " . $pg_code . " sudah ada!"]);
+        }
         $validated['pg_code'] = $pg_code;
 
         $result = PaymentGateway::create($validated);

@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PaymentGateway;
 use App\Models\PaymentMethod;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class PaymentMethodController extends ApiController
@@ -65,7 +66,7 @@ class PaymentMethodController extends ApiController
 
         $pg = PaymentGateway::where('pg_code', $request->from)->first();
         if (!$pg) {
-            return $this->sendError(1, "Kode payment gateway yang dipilih tidak ada!", []);
+            return $this->sendError(1, "Gagal menambah data!", ["Kode payment gateway yang dipilih tidak ada!"]);
         }
         
         $validated = $validator->validated();
@@ -120,6 +121,7 @@ class PaymentMethodController extends ApiController
         $validator = $this->validateThis($request, [
             'pm_title' => 'required',
             'pm_logo' => 'required',
+            'pm_code' => 'required',
             'from' => 'required',
         ]);
         
@@ -141,6 +143,10 @@ class PaymentMethodController extends ApiController
         $validated = $validator->validated();
         // $pm_code = generateFiledCode('PM');
         // $validated['pm_code'] = $pm_code;
+
+        if (Storage::exists('public' . $payment_method->pm_logo)) {
+            Storage::delete('public' . $payment_method->pm_logo);
+        }
 
         $img_path = uploadFotoWithFileName($request->pm_logo, 'PM', '/payment_method');
         $validated['pm_logo'] = $img_path;
@@ -172,6 +178,11 @@ class PaymentMethodController extends ApiController
         }
         
         $result = $payment_method->delete();
+
+        if (Storage::exists('public' . $payment_method->pm_logo)) {
+            Storage::delete('public' . $payment_method->pm_logo);
+        }
+
         if ($result) {
             return $this->sendResponse(0, "Berhasil menghapus data!", []);
         } else {
