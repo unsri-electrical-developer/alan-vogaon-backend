@@ -18,10 +18,9 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'v1'], function () {
     Route::get('/', [TestController::class, 'test']);
     Route::post('/login', [AuthController::class, 'login']);
-
 });
 
-Route::group(['prefix' => 'v1', 'middleware' => 'auth:sanctum'], function () {
+Route::group(['prefix' => 'v1', 'middleware' => ['auth:sanctum', 'ability:admin']], function () {
     Route::get('/coba', function (Request $request) {
         return $request->user();
     });
