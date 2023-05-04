@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\FaqController;
 use App\Http\Controllers\Api\GamesController;
 use App\Http\Controllers\Api\GamesItemController;
 use App\Http\Controllers\Api\GeneralInfoController;
@@ -58,4 +59,9 @@ Route::group(['prefix' => 'v1', 'middleware' => ['auth:sanctum', 'ability:admin'
     // General Info
     Route::get('/general_info', [GeneralInfoController::class, 'getGeneralInfo']);
     Route::post('/general_info', [GeneralInfoController::class, 'setGeneralInfo']);
+
+    // Faq
+    Route::get('/faq', [FaqController::class, 'getFaq']);
+    Route::post('/faq', [FaqController::class, 'setFaq']);
+
 });
