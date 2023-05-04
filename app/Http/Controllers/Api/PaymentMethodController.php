@@ -208,7 +208,7 @@ class PaymentMethodController extends ApiController
                 'pm_code' => $pm_code,
                 'isActive' => $payment_method->isActive
             ];
-            return $this->sendError(1, "Gagal mengubah isActive!");
+            return $this->sendError(1, "Gagal mengubah isActive!", $data);
         }
     }
 }
