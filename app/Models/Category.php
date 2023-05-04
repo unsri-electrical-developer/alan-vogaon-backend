@@ -16,6 +16,7 @@ class Category extends Model
         'category_code'
     ];
 
+    // 1 to N (category -> games)
     public function games()
     {
         return $this->hasMany(Games::class, 'category_code', 'category_code');

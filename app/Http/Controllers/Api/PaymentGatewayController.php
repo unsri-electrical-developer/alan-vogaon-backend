@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\Controller;
-use App\Models\Games;
+use App\Models\PaymentGateway;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class GamesController extends ApiController
+class PaymentGatewayController extends ApiController
 {
     public function validateThis($request, $rules = array())
     {
@@ -28,29 +28,13 @@ class GamesController extends ApiController
      */
     public function index(Request $request)
     {
-        $games = Games::with('category:category_name,category_code')
+        $payment_gateways = PaymentGateway::latest()
             ->when($request->has('search'), function ($query) use ($request) {
-                $query->where('title', 'like', '%' . $request->search . '%');
+                $query->where('pg_name', 'like', '%' . $request->search . '%');
             })
-            ->when($request->has('category_code'), function ($query) use ($request) {
-                $query->where('category_code', $request->category_code);
-            })
-            ->get([
-                'title',
-                'code',
-                'img',
-                'category_code'
-            ]);
-        
-        // Cek img url atau file
-        foreach ($games as $item) {
-            if (!filter_var($item->img, FILTER_VALIDATE_URL)) {
-                $file_url = asset('storage' . $item->img);
-                $item->img = $file_url;
-            }
-        }
+            ->get(['pg_name', 'pg_code', 'created_at']);
 
-        return $this->sendResponse(0, "Sukses", $games);
+        return $this->sendResponse(0, "Sukses", $payment_gateways);
     }
 
     /**
@@ -62,9 +46,7 @@ class GamesController extends ApiController
     public function store(Request $request)
     {
         $validator = $this->validateThis($request, [
-            'img' => 'required',
-            'title' => 'required',
-            'category_code' => 'required'
+            'pg_name' => 'required'
         ]);
         
         if ($validator->fails()) {
@@ -72,14 +54,16 @@ class GamesController extends ApiController
         }
         
         $validated = $validator->validated();
-        $game_code = generateFiledCode('GAMES');
-        $validated['code'] = $game_code;
+        $pg_code = generateFiledCode('PG');
+        $validated['pg_code'] = $pg_code;
 
-        $img_path = uploadFotoWithFileName($request->img, 'GAMES', '/games');
-        $validated['img'] = $img_path;
-
-        $result = Games::create($validated);
-        return $this->sendResponse(0, "Sukses", []);
+        $result = PaymentGateway::create($validated);
+        if ($result) {
+            return $this->sendResponse(0, "Berhasil menambah data!", []);
+        } else {
+            return $this->sendError(1, "Gagal menambah data!", []);
+        }
+        
     }
 
     /**
@@ -90,18 +74,13 @@ class GamesController extends ApiController
      */
     public function show($id)
     {
-        $game = Games::where('code', $id)->with('category:category_name,category_code')->first();
+        $pg = PaymentGateway::where('pg_code', $id)->first();
         
-        if (!$game) {
+        if (!$pg) {
             return $this->sendError(1, "Data tidak ditemukan", []);
         }
 
-        if (!filter_var($game->img, FILTER_VALIDATE_URL)) {
-            $file_url = asset('storage' . $game->img);
-            $game->img = $file_url;
-        }
-
-        return $this->sendResponse(0, "Sukses", $game);
+        return $this->sendResponse(0, "Sukses", $pg);
     }
 
     /**
@@ -114,26 +93,25 @@ class GamesController extends ApiController
     public function update(Request $request, $id)
     {
         $validator = $this->validateThis($request, [
-            'title' => 'required',
-            'category_code' => 'required'
+            'pg_name' => 'required'
         ]);
         
         if ($validator->fails()) {
             return $this->sendError(1, 'Params not complete', $this->validationMessage($validator->errors()));
         }
 
-        $game = Games::where('code', $id)->first();
-        if (!$game) {
-            return $this->sendError(1, "Data tidak ditemukan1", []);
+        $pg = PaymentGateway::where('pg_code', $id)->first();
+        
+        if (!$pg) {
+            return $this->sendError(1, "Data tidak ditemukan", []);
         }
-        
-        $validated = $validator->validated();
-        
-        $result = $game->update($validated);
+        $pg->pg_name = $request->pg_name;
+
+        $result = $pg->save();
         if ($result) {
             return $this->sendResponse(0, "Berhasil mengubah data!", []);
         } else {
-            return $this->sendError(1, "Gagal mengubah data!", []);
+            return $this->sendError(0, "Gagal mengubah data!", []);
         }
         
     }
@@ -146,14 +124,18 @@ class GamesController extends ApiController
      */
     public function destroy($id)
     {
-        $game = Games::where('code', $id)->first();
+        $pg = PaymentGateway::where('pg_code', $id)->first();
         
-        if (!$game) {
+        if (!$pg) {
             return $this->sendError(1, "Data tidak ditemukan", []);
         }
         
-        $result = $game->delete();
+        $result = $pg->delete();
+        if ($result) {
+            return $this->sendResponse(0, "Berhasil menghapus data!", []);
+        } else {
+            return $this->sendError(1, "Gagal menghapus data!", []);
+        }
         
-        return $this->sendResponse(0, "Sukses", []);
     }
 }

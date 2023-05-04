@@ -14,9 +14,16 @@ class UserController extends ApiController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::latest()->get(['name', 'users_code', 'email', 'no_telp', 'created_at']);
+        $users = User::latest()
+            ->when($request->has('search'), function ($query) use ($request) {
+                $query->where('name', 'like', '%' . $request->search . '%')
+                ->orWhere('email', 'like', '%' . $request->search . '%')
+                ->orWhere('no_telp', 'like', '%' . $request->search . '%');
+            })
+            ->get(['name', 'users_code', 'email', 'no_telp', 'created_at']);
+
         return $this->sendResponse(0, "Sukses", $users);
     }
 

@@ -27,12 +27,16 @@ class CategoryController extends ApiController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::latest()->get([
-            'category_name',
-            'category_code'
-        ]);
+        $categories = Category::latest()
+            ->when($request->has('search'), function ($query) use ($request) {
+                $query->where('category_name', 'like', '%' . $request->search . '%');
+            })
+            ->get([
+                'category_name',
+                'category_code'
+            ]);
 
         return $this->sendResponse(0, "Sukses", $categories);
     }

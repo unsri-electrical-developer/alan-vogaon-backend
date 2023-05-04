@@ -18,8 +18,15 @@ class Games extends Model
         'category_code'
     ];
 
+    // N to 1 (games -> category)
     public function category()
     {
         return $this->belongsTo(Category::class, 'category_code', 'category_code', 'category');
+    }
+
+    // 1 to N (games -> games_item)
+    public function games_item()
+    {
+        return $this->hasMany(GamesItem::class, 'game_code', 'code');
     }
 }
