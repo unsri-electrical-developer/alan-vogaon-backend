@@ -22,7 +22,7 @@ class UserController extends ApiController
                 ->orWhere('email', 'like', '%' . $request->search . '%')
                 ->orWhere('no_telp', 'like', '%' . $request->search . '%');
             })
-            ->get(['name', 'users_code', 'email', 'no_telp', 'created_at']);
+            ->get(['name', 'users_code', 'email', 'no_telp', 'users_profile_pic', 'created_at']);
 
         return $this->sendResponse(0, "Sukses", $users);
     }

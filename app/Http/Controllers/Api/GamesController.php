@@ -35,6 +35,7 @@ class GamesController extends ApiController
             ->when($request->has('category_code'), function ($query) use ($request) {
                 $query->where('category_code', $request->category_code);
             })
+            ->latest()
             ->get([
                 'title',
                 'code',
@@ -128,6 +129,11 @@ class GamesController extends ApiController
         }
         
         $validated = $validator->validated();
+
+        if ($request->has('img')) {
+            $img_path = uploadFotoWithFileName($request->img, 'GAMES', '/games');
+            $validated['img'] = $img_path;
+        }
         
         $result = $game->update($validated);
         if ($result) {
