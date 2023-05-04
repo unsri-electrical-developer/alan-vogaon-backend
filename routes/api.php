@@ -48,4 +48,5 @@ Route::group(['prefix' => 'v1', 'middleware' => 'auth:sanctum'], function () {
 
     // Payment Method
     Route::apiResource('/payment_method', PaymentMethodController::class);
+    Route::post('/payment_method/{pm_code}', [PaymentMethodController::class, 'togglePaymentMethod']);
 });

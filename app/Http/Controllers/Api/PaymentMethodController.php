@@ -178,4 +178,37 @@ class PaymentMethodController extends ApiController
             return $this->sendError(1, "Gagal menghapus data!", []);
         }
     }
+
+    public function togglePaymentMethod(Request $request, $pm_code)
+    {
+        $validator = $this->validateThis($request, [
+            'isActive' => 'required'
+        ]);
+        
+        if ($validator->fails()) {
+            return $this->sendError(1, 'Params not complete', $this->validationMessage($validator->errors()));
+        }
+
+        $payment_method = PaymentMethod::where('pm_code', $pm_code)->first();
+        if (!$payment_method) {
+            return $this->sendError(1, "Data tidak ditemukan!", []);
+        }
+
+        $validated = $validator->validated();
+
+        $result = $payment_method->update($validated);
+        if ($result) {
+            $data = [
+                'pm_code' => $pm_code,
+                'isActive' => $request->isActive
+            ];
+            return $this->sendResponse(0, "Berhasil mengubah isActive!", $data);
+        } else {
+            $data = [
+                'pm_code' => $pm_code,
+                'isActive' => $payment_method->isActive
+            ];
+            return $this->sendError(1, "Gagal mengubah isActive!");
+        }
+    }
 }
