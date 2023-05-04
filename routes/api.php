@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\GamesController;
 use App\Http\Controllers\Api\GamesItemController;
+use App\Http\Controllers\Api\GeneralInfoController;
 use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\PaymentGatewayController;
 use App\Http\Controllers\Api\PaymentMethodController;
@@ -53,4 +54,8 @@ Route::group(['prefix' => 'v1', 'middleware' => ['auth:sanctum', 'ability:admin'
     // Riwayat Pembelian
     Route::get('/transaction/riwayat_pembelian', [RiwayatPembelianController::class, 'getAllRiwayatPembelian']);
     Route::get('/transaction/riwayat_pembelian/total', [RiwayatPembelianController::class, 'getJumlahPendapatan']);
+
+    // General Info
+    Route::get('/general_info', [GeneralInfoController::class, 'getGeneralInfo']);
+    Route::post('/general_info', [GeneralInfoController::class, 'setGeneralInfo']);
 });
