@@ -30,6 +30,13 @@ class SlidersController extends ApiController
     {
         $sliders = Sliders::latest()->get();
 
+        foreach ($sliders as $item) {
+            if (!filter_var($item->image, FILTER_VALIDATE_URL)) {
+                $file_url = asset('storage' . $item->image);
+                $item->image = $file_url;
+            }
+        }
+
         return $this->sendResponse(0, "Sukses", $sliders);
     }
 
@@ -50,6 +57,9 @@ class SlidersController extends ApiController
         }
 
         $validated = $validator->validated();
+        
+        $img_path = uploadFotoWithFileName($request->image, 'SLIDERS', '/sliders');
+        $validated['image'] = $img_path;
 
         $result = Sliders::create($validated);
         return $this->sendResponse(0, "Sukses", []);
@@ -67,6 +77,11 @@ class SlidersController extends ApiController
         
         if (!$slider) {
             return $this->sendError(1, "Data tidak ditemukan", []);
+        }
+
+        if (!filter_var($slider->image, FILTER_VALIDATE_URL)) {
+            $file_url = asset('storage' . $slider->image);
+            $slider->image = $file_url;
         }
 
         return $this->sendResponse(0, "Sukses", $slider);
