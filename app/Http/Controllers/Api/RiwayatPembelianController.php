@@ -27,12 +27,12 @@ class RiwayatPembelianController extends ApiController
         ->join('users', 'transaction.users_code', '=', 'users.users_code')
         ->join('games_item', 'transaction_detail.item_code', '=', 'games_item.code')
         ->join('games', 'games.code', '=', 'games_item.game_code')
+        ->when($request->has('tanggal'), function ($query) use ($request) {
+            $query->whereDate('transaction.created_at', '=', $request->tanggal);
+        })
         ->when($request->has('search'), function ($query) use ($request) {
             $query->where('games.title', 'like', '%' . $request->search . '%')
             ->orWhere('games_item.title', 'like', '%' . $request->search . '%');
-        })
-        ->when($request->has('tanggal'), function ($query) use ($request) {
-            $query->whereDate('transaction.created_at', '=', $request->tanggal);
         })
         ->orderBy('transaction.created_at', )->get();
 
