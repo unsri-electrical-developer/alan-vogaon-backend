@@ -16,7 +16,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\ApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
+use PharIo\Manifest\AuthorCollection;
 
 Route::group(['prefix' => 'v1'], function () {
     Route::get('/', [TestController::class, 'test']);
@@ -24,9 +24,9 @@ Route::group(['prefix' => 'v1'], function () {
 });
 
 Route::group(['prefix' => 'v1', 'middleware' => ['auth:sanctum', 'ability:admin']], function () {
-    Route::get('/coba', function (Request $request) {
-        return $request->user();
-    });
+
+    // Auth
+    Route::post('/check/token', [AuthController::class, 'tokenCheck']);
 
     Route::post('/logout', [AuthController::class, 'logout']);
 
