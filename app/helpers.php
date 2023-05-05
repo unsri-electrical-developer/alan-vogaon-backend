@@ -5,7 +5,8 @@ use Illuminate\Support\Facades\Storage;
 if (!function_exists('generateFiledCode')) {
     function generateFiledCode($code)
     {
-        $result = $code . '-' . date('s') . date('Y') . date('m') . date('d') . date('h') . date('i') . mt_rand(1000, 9999);
+        $result = $code . '-' . date('s') . date('Y') . date('m') . date('d') . date('h') . date('i') . mt_rand(1000000, 9999999);
+
 
         return $result;
     }
@@ -47,6 +48,17 @@ if (!function_exists('uploadFotoWithFileName')) {
         $base64Data = str_replace($replaceList, '', $base64Data);
 
         return base64_decode($base64Data);
+    }
+}
+
+/*
+ *  Remove whitespace, special character, and turn string to lower case
+ */
+if (!function_exists('normalizeString')) {
+    function normalizeString($input)
+    {
+        $res = preg_replace("/[^a-zA-Z]+/", "", $input);
+        return strtolower($res);
     }
 }
 

@@ -32,4 +32,26 @@ class AuthController extends ApiController
 
         return $this->sendResponse(0, "Logout berhasil", []);
     }
+
+    public function tokenCheck(Request $request)
+    {
+        $check = Auth::check();
+        $header = Auth::user($request->header('Authorization'));
+
+        // return $header;
+        if (!Auth::check()) {
+            auth('sanctum')->user()->currentAccessToken()->delete();
+            return $this->sendError(2, "Unauthorized.", (object) array());
+        } else {
+            $logged = Auth::user($request->header('Authorization'));
+            $logged['access_token'] = $request->bearerToken();
+
+            if ($header) {
+                return  $this->sendResponse(0, 'Valid Token', $logged);
+            } else {
+                return  $this->sendResponse(2, 'Invalid Token');
+            }
+        }
+
+    }
 }
