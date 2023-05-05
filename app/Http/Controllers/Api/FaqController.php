@@ -53,7 +53,7 @@ class FaqController extends ApiController
 
     public function getFaq(Request $request)
     {
-        $faqs = Faq::all();
+        $faqs = Faq::all(['pertanyaan', 'jawaban', 'created_at']);
 
         return $this->sendResponse(0, "Sukses", $faqs);
     }
