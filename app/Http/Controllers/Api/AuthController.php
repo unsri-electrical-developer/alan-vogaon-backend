@@ -46,6 +46,7 @@ class AuthController extends ApiController
             return $this->sendError(2, "Unauthorized.", (object) array());
         } else {
             $logged = Auth::user($request->header('Authorization'));
+            $logged['access_token'] = $request->bearerToken();
 
             if ($header) {
                 return  $this->sendResponse(0, 'Valid Token', $logged);
