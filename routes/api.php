@@ -38,7 +38,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['auth:sanctum', 'ability:admin'
 
     // Sliders
     Route::apiResource('/sliders', SlidersController::class);
-    
+
     // Games Item / Products
     Route::apiResource('/games_item/{game_code}/products', GamesItemController::class);
 

@@ -13,8 +13,7 @@ class AuthController extends ApiController
 {
     public function login(Request $request)
     {
-        if (!auth('admin')->attempt($request->only('email', 'password')))
-        {
+        if (!auth('admin')->attempt($request->only('email', 'password'))) {
             return $this->sendError(1, "Login gagal! Silahkan cek kembali email dan password", []);
         }
 
@@ -25,7 +24,6 @@ class AuthController extends ApiController
         $data->access_token = $token;
 
         return $this->sendResponse(0, "Login berhasil", $data);
-        
     }
 
     public function logout(Request $request)
