@@ -22,6 +22,7 @@ class AuthController extends ApiController
         $token = $user->createToken(auth('admin')->user()->email, ['admin'])->plainTextToken;
         $data = auth('admin')->user();
         $data->access_token = $token;
+        $data['users_type'] = 'SA';
 
         return $this->sendResponse(0, "Login berhasil", $data);
     }
@@ -45,6 +46,7 @@ class AuthController extends ApiController
         } else {
             $logged = Auth::user($request->header('Authorization'));
             $logged['access_token'] = $request->bearerToken();
+            $logged['users_type'] = 'SA';
 
             if ($header) {
                 return  $this->sendResponse(0, 'Valid Token', $logged);
@@ -52,6 +54,5 @@ class AuthController extends ApiController
                 return  $this->sendResponse(2, 'Invalid Token');
             }
         }
-
     }
 }
