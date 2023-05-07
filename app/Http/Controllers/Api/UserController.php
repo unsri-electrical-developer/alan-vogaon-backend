@@ -24,6 +24,26 @@ class UserController extends ApiController
             })
             ->get(['name', 'users_code', 'email', 'no_telp', 'users_profile_pic', 'created_at']);
 
+        // Cek img url atau file
+
+        foreach ($users as $item) {
+            if (!empty($item->users_profile_pic)) {
+                if (!filter_var($item->users_profile_pic, FILTER_VALIDATE_URL)) {
+                    $file_path = storage_path('app/public' . $item->users_profile_pic);
+                    if (file_exists($file_path)) {
+                        $file_url = asset('storage' . $item->users_profile_pic);
+                        $item->users_profile_pic = $file_url;
+                    } else {
+                        $item->users_profile_pic = null;
+                    }
+                    
+                }
+            } else {
+                $item->users_profile_pic = null;
+            }
+            
+        }
+
         return $this->sendResponse(0, "Sukses", $users);
     }
 
@@ -55,6 +75,21 @@ class UserController extends ApiController
             'created_at'
         ]);
         
+        if (!empty($user->users_profile_pic)) {
+            if (!filter_var($user->users_profile_pic, FILTER_VALIDATE_URL)) {
+                $file_path = storage_path('app/public' . $user->users_profile_pic);
+                if (file_exists($file_path)) {
+                    $file_url = asset('storage' . $user->users_profile_pic);
+                    $user->users_profile_pic = $file_url;
+                } else {
+                    $user->users_profile_pic = null;
+                    
+                }
+            }
+        } else {
+            $user->users_profile_pic = null;
+        }
+
         return $this->sendResponse(0, "Sukses", $user);
     }
 

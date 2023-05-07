@@ -32,7 +32,8 @@ class RiwayatPembelianController extends ApiController
         })
         ->when($request->has('search'), function ($query) use ($request) {
             $query->where('games.title', 'like', '%' . $request->search . '%')
-            ->orWhere('games_item.title', 'like', '%' . $request->search . '%');
+            ->orWhere('games_item.title', 'like', '%' . $request->search . '%')
+            ->orWhere('users.name', 'like', '%' . $request->search . '%');
         })
         ->orderBy('transaction.created_at', )->get();
 
@@ -47,9 +48,33 @@ class RiwayatPembelianController extends ApiController
     public function getJumlahPendapatan(Request $request)
     {
         $total = Transaction::where('status', 'done')->sum('total_amount');
+
+        $dateFrom = Carbon::now()->subDays(30);
+        $dateTo = Carbon::now();
+        $monthly = Transaction::whereBetween('created_at', [$dateFrom, $dateTo])->sum('total_amount');
+
+        $previousDateFrom = Carbon::now()->subDays(60);
+        $previousDateTo = Carbon::now()->subDays(31);
+        $previousMonthly = Transaction::whereBetween('created_at', [$previousDateFrom,$previousDateTo])->sum('total_amount');
         
+        if($previousMonthly < $monthly){
+            if($previousMonthly >0){
+                $percent_from = $monthly - $previousMonthly;
+                $percent = $percent_from / $previousMonthly * 100; //increase percent
+            }else{
+                $percent = 100; //increase percent
+            }
+            $jenis = 'naik';
+        }else{
+            $percent_from = $previousMonthly -$monthly;
+            $percent = $percent_from / $previousMonthly * 100; //decrease percent
+            $jenis = 'turun';
+        }
+
         return $this->sendResponse(0, "Sukses", [
-            "jumlah_pendapatan" => $total
+            "jumlah_pendapatan" => $total,
+            "persentase" => number_format($percent, 1),
+            "grafik_pendapatan" => $jenis,
         ]);
     }
 }
