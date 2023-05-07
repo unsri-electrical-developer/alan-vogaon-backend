@@ -13,6 +13,8 @@ class CreatePaymentGatewayTable extends Migration
      */
     public function up()
     {
+    	Schema::dropIfExists('payment_gateway');
+    	
         Schema::create('payment_gateway', function (Blueprint $table) {
             $table->id();
             $table->string('pg_name');

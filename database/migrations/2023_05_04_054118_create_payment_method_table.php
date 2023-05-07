@@ -13,6 +13,8 @@ class CreatePaymentMethodTable extends Migration
      */
     public function up()
     {
+    	Schema::dropIfExists('payment_method');	
+    
         Schema::create('payment_method', function (Blueprint $table) {
             $table->id();
             $table->string('pm_code');
