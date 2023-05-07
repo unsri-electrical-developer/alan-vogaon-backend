@@ -9,8 +9,10 @@ use App\Http\Controllers\Api\GeneralInfoController;
 use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\PaymentGatewayController;
 use App\Http\Controllers\Api\PaymentMethodController;
+use App\Http\Controllers\Api\PrivacyPolicyController;
 use App\Http\Controllers\Api\RiwayatPembelianController;
 use App\Http\Controllers\Api\SlidersController;
+use App\Http\Controllers\Api\SyaratKetentuanController;
 use App\Http\Controllers\Api\TestController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\ApiController;
@@ -63,4 +65,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['auth:sanctum', 'ability:admin'
     // Faq
     Route::get('/faq', [FaqController::class, 'getFaq']);
     Route::post('/faq', [FaqController::class, 'setFaq']);
+
+    // S&K
+    Route::get('/syarat_ketentuan', [SyaratKetentuanController::class, 'getSyaratKetentuan']);
+    Route::post('/syarat_ketentuan', [SyaratKetentuanController::class, 'setSyaratKetentuan']);
+
+    // Privacy Policy
+    Route::get('/privacy_policy', [PrivacyPolicyController::class, 'getPrivacyPolicy']);
+    Route::post('/privacy_policy', [PrivacyPolicyController::class, 'setPrivacyPolicy']);
+
 });
