@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\FaqController;
 use App\Http\Controllers\Api\GamesController;
 use App\Http\Controllers\Api\GamesItemController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\PaymentGatewayController;
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\PrivacyPolicyController;
+use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\RiwayatPembelianController;
 use App\Http\Controllers\Api\SlidersController;
 use App\Http\Controllers\Api\SyaratKetentuanController;
@@ -73,5 +75,14 @@ Route::group(['prefix' => 'v1', 'middleware' => ['auth:sanctum', 'ability:admin'
     // Privacy Policy
     Route::get('/privacy_policy', [PrivacyPolicyController::class, 'getPrivacyPolicy']);
     Route::post('/privacy_policy', [PrivacyPolicyController::class, 'setPrivacyPolicy']);
+
+    // Dashboard
+    Route::get('/dashboard/data_dashboard', [DashboardController::class, 'getDataDashboard']);
+    Route::get('/dashboard/statistik_pendapatan', [DashboardController::class, 'getStatistikPendapatan']);
+    Route::get('/dashboard/statistik_pendaftaran', [DashboardController::class, 'getStatistikPendaftaran']);
+
+    // Profile
+    Route::patch('/profile/edit_profile', [ProfileController::class, 'editProfile']);
+    Route::get('/profile/get_profile', [ProfileController::class, 'getProfile']);
 
 });
