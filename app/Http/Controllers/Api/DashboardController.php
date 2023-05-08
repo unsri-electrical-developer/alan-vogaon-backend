@@ -32,14 +32,6 @@ class DashboardController extends ApiController
             $monthFilled[$i] = array_key_exists($i+1, $userRegistered->toArray()) ? $userRegistered->toArray()[$i+1] : 0;
         }
 
-        $coll = [];
-        $coll['total_pembelian'] = "1000";
-        $coll['total_pembelian_percent'] = "200%";
-        $coll['jumlah_pendaftar'] = "1000";
-        $coll['jumlah_pendaftar_percent'] = "200%";
-        $coll['jumlah_transaksi'] = "1000";
-        $coll['jumlah_transaksi_percent'] = "200%";
-
         return $this->sendResponse(0, "Sukses", $monthFilled);
 
     }
@@ -64,14 +56,6 @@ class DashboardController extends ApiController
         for ($i=0; $i < 12; $i++) { 
             $monthFilled[$i] = array_key_exists($i+1, $userRegistered->toArray()) ? $userRegistered->toArray()[$i+1] : 0;
         }
-
-        $coll = [];
-        $coll['total_pembelian'] = "1000";
-        $coll['total_pembelian_percent'] = "200%";
-        $coll['jumlah_pendaftar'] = "1000";
-        $coll['jumlah_pendaftar_percent'] = "200%";
-        $coll['jumlah_transaksi'] = "1000";
-        $coll['jumlah_transaksi_percent'] = "200%";
 
         return $this->sendResponse(0, "Sukses", $monthFilled);
 
@@ -99,7 +83,7 @@ class DashboardController extends ApiController
             $jenis = 'naik';
         }else{
             $percent_from = $previousMonthly -$monthly;
-            $percent = $percent_from / $previousMonthly * 100; //decrease percent
+            $percent = -($percent_from / $previousMonthly * 100); //decrease percent
             $jenis = 'turun';
         }
 
@@ -124,7 +108,7 @@ class DashboardController extends ApiController
             $user_jenis = 'naik';
         }else{
             $user_percent_from = $userPreviousMonthly -$userMonthly;
-            $user_percent = $user_percent_from / $userPreviousMonthly * 100; //decrease user_percent
+            $user_percent = -($user_percent_from / $userPreviousMonthly * 100); //decrease user_percent
             $user_jenis = 'turun';
         }
 
@@ -149,7 +133,7 @@ class DashboardController extends ApiController
             $transaction_jenis = 'naik';
         } else {
             $transaction_percent_from = $transactionPrevMonthly -$transactionMonthly;
-            $transaction_percent = $transaction_percent_from / $transactionPrevMonthly * 100; //decrease transaction_percent
+            $transaction_percent = -($transaction_percent_from / $transactionPrevMonthly * 100); //decrease transaction_percent
             $transaction_jenis = 'turun';
         }
 

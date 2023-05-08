@@ -67,14 +67,14 @@ class RiwayatPembelianController extends ApiController
             $jenis = 'naik';
         }else{
             $percent_from = $previousMonthly -$monthly;
-            $percent = $percent_from / $previousMonthly * 100; //decrease percent
+            $percent = -($percent_from / $previousMonthly * 100); //decrease percent
             $jenis = 'turun';
         }
 
         return $this->sendResponse(0, "Sukses", [
             "jumlah_pendapatan" => $total,
             "persentase" => number_format($percent, 1),
-            "grafik_pendapatan" => $jenis,
+            "naik_turun" => $jenis,
         ]);
     }
 }
