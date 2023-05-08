@@ -31,14 +31,19 @@ class PaymentMethodController extends ApiController
     {
         $payment_methods = PaymentMethod::latest()
         ->when($request->has('search'), function ($query) use ($request) {
-            $query->where('pm_name', 'like', '%' . $request->search . '%');
+            $query->where('pm_title', 'like', '%' . $request->search . '%');
         })
         ->get(['pm_title', 'pm_code', 'pm_logo', 'from', 'isActive', 'created_at']);
 
         foreach ($payment_methods as $item) {
             if (!filter_var($item->pm_logo, FILTER_VALIDATE_URL)) {
-                $file_url = asset('storage' . $item->pm_logo);
-                $item->pm_logo = $file_url;
+                $file_path = storage_path('app/public' . $item->pm_logo);
+                if (file_exists($file_path)) {
+                    $file_url = asset('storage' . $item->pm_logo);
+                    $item->pm_logo = $file_url;
+                } else {
+                    $item->pm_logo = null;
+                }
             }
         }
 

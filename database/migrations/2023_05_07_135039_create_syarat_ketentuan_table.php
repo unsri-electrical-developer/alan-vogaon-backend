@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateFaqTable extends Migration
+class CreateSyaratKetentuanTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,12 @@ class CreateFaqTable extends Migration
      */
     public function up()
     {
-        Schema::dropIfExists('faq');
+        Schema::dropIfExists('syarat_ketentuan');
 
-        Schema::create('faq', function (Blueprint $table) {
+        Schema::create('syarat_ketentuan', function (Blueprint $table) {
             $table->id();
-            $table->string('pertanyaan');
-            $table->text('jawaban');
+            $table->string('syarat_ketentuan_code')->unique();
+            $table->text('body');
             $table->timestamps();
         });
     }
@@ -30,6 +30,6 @@ class CreateFaqTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('faq');
+        Schema::dropIfExists('syarat_ketentuan');
     }
 }

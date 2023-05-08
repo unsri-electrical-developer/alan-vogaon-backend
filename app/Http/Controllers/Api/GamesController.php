@@ -39,16 +39,25 @@ class GamesController extends ApiController
             ->latest()
             ->get([
                 'title',
-                'code',
+                'code as game_code',
                 'img',
                 'category_code'
             ]);
         
         // Cek img url atau file
         foreach ($games as $item) {
-            if (!filter_var($item->img, FILTER_VALIDATE_URL)) {
-                $file_url = asset('storage' . $item->img);
-                $item->img = $file_url;
+            if (!empty($item->img)) {
+                if (!filter_var($item->img, FILTER_VALIDATE_URL)) {
+                    $file_path = storage_path('app/public' . $item->img);
+                    if (file_exists($file_path)) {
+                        $file_url = asset('storage' . $item->img);
+                        $item->img = $file_url;
+                    } else {
+                        $item->img = null;
+                    }
+                }
+            } else {
+                $item->img = null;
             }
         }
 
@@ -118,15 +127,32 @@ class GamesController extends ApiController
     {
         $game = Games::where('code', $id)
             ->with(['category:category_name,category_code', 'games_item:code,title,price,game_code' ])
-            ->first();
+            ->first([
+                'title',
+                'code',
+                'code as game_code',
+                'img',
+                'category_code',
+                'created_at',
+
+            ]);
         
         if (!$game) {
             return $this->sendError(1, "Data tidak ditemukan", []);
         }
 
-        if (!filter_var($game->img, FILTER_VALIDATE_URL)) {
-            $file_url = asset('storage' . $game->img);
-            $game->img = $file_url;
+        if (!empty($game->img)) {
+            if (!filter_var($game->img, FILTER_VALIDATE_URL)) {
+                $file_path = storage_path('app/public' . $game->img);
+                if (file_exists($file_path)) {
+                    $file_url = asset('storage' . $game->img);
+                    $game->img = $file_url;
+                } else {
+                    $game->img = null;
+                }
+            }
+        } else {
+            $game->img = null;
         }
 
         return $this->sendResponse(0, "Sukses", $game);
