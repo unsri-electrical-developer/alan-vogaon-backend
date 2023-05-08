@@ -27,7 +27,7 @@ class FaqController extends ApiController
         $validator = $this->validateThis($request, [
             'faq' => 'required',
         ]);
-        
+
         if ($validator->fails()) {
             return $this->sendError(1, 'Params not complete', $this->validationMessage($validator->errors()));
         }
@@ -35,15 +35,17 @@ class FaqController extends ApiController
         $faq_arr = [];
 
         foreach ($request->faq as $key => $faq) {
-            $faq_arr[$key]['pertanyaan'] = $faq['pertanyaan'];
-            $faq_arr[$key]['jawaban'] = $faq['jawaban'];
-            $faq_arr[$key]['created_at'] = Carbon::now();
-            $faq_arr[$key]['updated_at'] = Carbon::now();
+            if ($faq['pertanyaan'] !== null || $faq['jawaban'] !== null) {
+                $faq_arr[$key]['pertanyaan'] = $faq['pertanyaan'];
+                $faq_arr[$key]['jawaban'] = $faq['jawaban'];
+                $faq_arr[$key]['created_at'] = Carbon::now();
+                $faq_arr[$key]['updated_at'] = Carbon::now();
+            }
         }
 
         Faq::whereNotNull('id')->delete();
         $res = Faq::insert($faq_arr);
-        
+
         if (!$res) {
             $this->sendError(1, "Gagal menyimpan data!", []);
         }
@@ -53,7 +55,7 @@ class FaqController extends ApiController
 
     public function getFaq(Request $request)
     {
-        $faqs = Faq::all(['pertanyaan', 'jawaban', 'created_at']);
+        $faqs = Faq::all(['id', 'pertanyaan', 'jawaban', 'created_at']);
 
         return $this->sendResponse(0, "Sukses", $faqs);
     }
