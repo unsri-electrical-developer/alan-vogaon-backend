@@ -122,7 +122,7 @@ class DashboardController extends ApiController
 
         $transactionPrevMonthly = Transaction::whereYear('created_at', $tahun_sekarang)
             ->whereMonth('created_at', Carbon::now()->subMonth()->month)->count();
-        // dd($transactionMonthly, $transactionPrevMonthly);
+
         if($transactionPrevMonthly < $transactionMonthly){
             if($transactionPrevMonthly >0){
                 $transaction_percent_from = $transactionMonthly - $transactionPrevMonthly;
@@ -157,5 +157,47 @@ class DashboardController extends ApiController
         ];
 
         return $this->sendResponse(0, "Sukses", $data);
+    }
+
+    public function getStatistikPenjualanGame(Request $request)
+    {
+        $tahun = Carbon::now()->format('Y');
+        if ($request->has('tahun')) {
+            if (!empty($request->tahun)) {
+                $tahun = $request->tahun;
+            }
+        } 
+        $bulan = Carbon::now()->month;
+        if ($request->has('bulan')) {
+            if (!empty($request->bulan)) {
+                $bulan = $request->bulan;
+            }
+        } 
+        
+        $data = Transaction::selectRaw('games.title as title')->selectRaw('sum(total_amount) as total')
+        ->join('transaction_detail', 'transaction.transaction_code', '=', 'transaction_detail.transaction_code')
+        ->join('games_item', 'transaction_detail.item_code', '=', 'games_item.code')
+        ->join('games', 'games_item.game_code', '=', 'games.code')
+        ->whereYear('transaction.created_at', $tahun)
+        ->whereMonth('transaction.created_at', $bulan)
+        ->where('status', 'done')
+        ->groupBy('games.title')
+        ->get();
+
+        $data_penjualan = [];
+        $label = [];
+        foreach ($data as $item) {
+            $data_penjualan[] = $item->total;
+            $label[] = $item->title;
+        }
+
+        $result = [
+            'jumlah_penjualan' => $data_penjualan,
+            'label' => $label
+        ];
+
+        if ($data) {
+            return $this->sendResponse(0, "Sukses", $result);
+        }
     }
 }

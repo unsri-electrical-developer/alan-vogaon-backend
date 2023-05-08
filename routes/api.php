@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\PrivacyPolicyController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\RiwayatPembelianController;
+use App\Http\Controllers\Api\RiwayatTopUpController;
 use App\Http\Controllers\Api\SlidersController;
 use App\Http\Controllers\Api\SyaratKetentuanController;
 use App\Http\Controllers\Api\TestController;
@@ -60,6 +61,11 @@ Route::group(['prefix' => 'v1', 'middleware' => ['auth:sanctum', 'ability:admin'
     Route::get('/transaction/riwayat_pembelian', [RiwayatPembelianController::class, 'getAllRiwayatPembelian']);
     Route::get('/transaction/riwayat_pembelian/total', [RiwayatPembelianController::class, 'getJumlahPendapatan']);
 
+    // Riwayat Top Up Saldo
+    Route::get('/transaction/riwayat_topupsaldo', [RiwayatTopUpController::class, 'getRiwayatTopUpSaldo']);
+    Route::get('/transaction/total_topupsaldo', [RiwayatTopUpController::class, 'getTotalTopUpSaldo']);
+    Route::get('/transaction/detail_topupsaldo/{kode}', [RiwayatTopUpController::class, 'getDetailTopUpSaldo']);
+
     // General Info
     Route::get('/general_info', [GeneralInfoController::class, 'getGeneralInfo']);
     Route::post('/general_info', [GeneralInfoController::class, 'setGeneralInfo']);
@@ -80,6 +86,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['auth:sanctum', 'ability:admin'
     Route::get('/dashboard/data_dashboard', [DashboardController::class, 'getDataDashboard']);
     Route::get('/dashboard/statistik_pendapatan', [DashboardController::class, 'getStatistikPendapatan']);
     Route::get('/dashboard/statistik_pendaftaran', [DashboardController::class, 'getStatistikPendaftaran']);
+    Route::get('/dashboard/statistik_penjualan_game', [DashboardController::class, 'getStatistikPenjualanGame']);
 
     // Profile
     Route::patch('/profile/edit_profile', [ProfileController::class, 'editProfile']);
