@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\Controller;
 use App\Models\Transaction;
+use App\Models\TransactionDetail;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -15,9 +16,7 @@ class RiwayatPembelianController extends ApiController
         $select = [
             'transaction.transaction_code',
             'users.name',
-            'games_item.title as item_title',
-            'games_item.price',
-            'games.title as game_title',
+            'transaction.total_amount',
             'transaction.created_at',
             'transaction.status'
         ];
@@ -25,20 +24,15 @@ class RiwayatPembelianController extends ApiController
         $riwayat_pembelian = Transaction::select($select)
         ->join('transaction_detail', 'transaction.transaction_code', '=', 'transaction_detail.transaction_code')
         ->join('users', 'transaction.users_code', '=', 'users.users_code')
-        ->join('games_item', 'transaction_detail.item_code', '=', 'games_item.code')
-        ->join('games', 'games.code', '=', 'games_item.game_code')
         ->when($request->has('tanggal'), function ($query) use ($request) {
             $query->whereDate('transaction.created_at', '=', $request->tanggal);
         })
         ->when($request->has('search'), function ($query) use ($request) {
-            $query->where('games.title', 'like', '%' . $request->search . '%')
-            ->orWhere('games_item.title', 'like', '%' . $request->search . '%')
-            ->orWhere('users.name', 'like', '%' . $request->search . '%');
+            $query->where('users.name', 'like', '%' . $request->search . '%');
         })
         ->orderBy('transaction.created_at', )->get();
 
         foreach ($riwayat_pembelian as $item) {
-            $item->nama_produk = $item->game_title . " " . $item->item_title;
             $item->waktu_transaksi = $item->created_at->format('Y-m-d');
         }
 
@@ -84,19 +78,13 @@ class RiwayatPembelianController extends ApiController
         $select = [
             'transaction.transaction_code',
             'users.name',
-            'games_item.title as item_title',
-            'games_item.price',
-            'games.title as game_title',
             'transaction.created_at',
             'transaction.status',
             'payment_method.pm_title as payment_method',
             'transaction.no_reference'
         ];
         $data = Transaction::select($select)
-        ->join('transaction_detail', 'transaction.transaction_code', '=', 'transaction_detail.transaction_code')
         ->join('users', 'transaction.users_code', '=', 'users.users_code')
-        ->join('games_item', 'transaction_detail.item_code', '=', 'games_item.code')
-        ->join('games', 'games.code', '=', 'games_item.game_code')
         ->join('payment_method', 'payment_method.pm_code', '=', 'transaction.payment_method')
         ->where('transaction.transaction_code', $kode_transaksi)
         ->first();
@@ -105,8 +93,26 @@ class RiwayatPembelianController extends ApiController
             return $this->sendError(1, "Data tidak ditemukan!", []);
         }
 
-        $data->nama_produk = $data->game_title . " " . $data->item_title;
+        $product_list = TransactionDetail::select([
+            'games.title as games_title',
+            'games_item.title as item_title',
+            'games_item.code'
+            ])
+            ->join('games_item', 'transaction_detail.item_code', '=', 'games_item.code')
+            ->join('games', 'games_item.game_code', '=', 'games.code')
+            ->where('transaction_code', $data->transaction_code)
+            ->latest('transaction_detail.created_at')->get();
+        
         $data->tanggal = $data->created_at->format('d/m/Y');
+
+        $product_array = [];
+        if ($product_list) {
+            foreach ($product_list as $item) {
+                $product_array[] = $item->games_title . ' ' . $item->item_title;
+            }
+        }
+
+        $data->product_list = $product_array;
 
         return $this->sendResponse(0, "Sukses", $data);
     }

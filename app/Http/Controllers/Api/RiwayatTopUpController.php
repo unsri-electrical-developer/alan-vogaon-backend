@@ -12,7 +12,7 @@ class RiwayatTopUpController extends ApiController
 {
     private $data_riwayat = [
         [
-            'name' => 'Rosa Amaliya',
+            'nama' => 'Rosa Amaliya',
             'nominal' => 50000,
             'no_transaksi' => 'INV7654356789',
             'waktu_transaksi' => '06/05/2023',
