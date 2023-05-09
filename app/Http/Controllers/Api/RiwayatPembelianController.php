@@ -77,4 +77,37 @@ class RiwayatPembelianController extends ApiController
             "naik_turun" => $jenis,
         ]);
     }
+
+    public function getDetailPembelian(Request $request, $kode)
+    {
+        $kode_transaksi = $kode;
+        $select = [
+            'transaction.transaction_code',
+            'users.name',
+            'games_item.title as item_title',
+            'games_item.price',
+            'games.title as game_title',
+            'transaction.created_at',
+            'transaction.status',
+            'payment_method.pm_title as payment_method',
+            'transaction.no_reference'
+        ];
+        $data = Transaction::select($select)
+        ->join('transaction_detail', 'transaction.transaction_code', '=', 'transaction_detail.transaction_code')
+        ->join('users', 'transaction.users_code', '=', 'users.users_code')
+        ->join('games_item', 'transaction_detail.item_code', '=', 'games_item.code')
+        ->join('games', 'games.code', '=', 'games_item.game_code')
+        ->join('payment_method', 'payment_method.pm_code', '=', 'transaction.payment_method')
+        ->where('transaction.transaction_code', $kode_transaksi)
+        ->first();
+
+        if (!$data) {
+            return $this->sendError(1, "Data tidak ditemukan!", []);
+        }
+
+        $data->nama_produk = $data->game_title . " " . $data->item_title;
+        $data->tanggal = $data->created_at->format('d/m/Y');
+
+        return $this->sendResponse(0, "Sukses", $data);
+    }
 }
