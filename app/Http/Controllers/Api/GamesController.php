@@ -34,7 +34,7 @@ class GamesController extends ApiController
                 $query->where('title', 'like', '%' . $request->search . '%');
             })
             ->when($request->has('category_code'), function ($query) use ($request) {
-                $query->where('category_code', $request->category_code);
+                $query->where('category_code', 'like', '%'. $request->category_code . '%');
             })
             ->latest()
             ->get([
