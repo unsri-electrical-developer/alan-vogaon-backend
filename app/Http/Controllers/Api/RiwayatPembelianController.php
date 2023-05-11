@@ -24,7 +24,7 @@ class RiwayatPembelianController extends ApiController
         $riwayat_pembelian = Transaction::select($select)
         ->join('transaction_detail', 'transaction.transaction_code', '=', 'transaction_detail.transaction_code')
         ->join('users', 'transaction.users_code', '=', 'users.users_code')
-        ->when($request->has('tanggal'), function ($query) use ($request) {
+        ->when($request->has('tanggal') && !empty($request->tanggal) , function ($query) use ($request) {
             $query->whereDate('transaction.created_at', '=', $request->tanggal);
         })
         ->when($request->has('search'), function ($query) use ($request) {
