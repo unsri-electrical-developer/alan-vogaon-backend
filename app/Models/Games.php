@@ -35,4 +35,8 @@ class Games extends Model
     {
         return $this->hasMany(Fields::class, 'game_code', 'code');
     }
+     public function redeem()
+    {
+        return $this->hasMany(GamesVoucher::class, 'game_code', 'code');
+    }
 }
