@@ -73,7 +73,7 @@ class DashboardController extends ApiController
         $previousDateTo = Carbon::now()->subDays(31);
         $previousMonthly = Transaction::whereBetween('created_at', [$previousDateFrom,$previousDateTo])->sum('total_amount');
         
-        if($previousMonthly < $monthly){
+        if($previousMonthly < $monthly ){
             if($previousMonthly >0){
                 $percent_from = $monthly - $previousMonthly;
                 $percent = $percent_from / $previousMonthly * 100; //increase percent
@@ -83,7 +83,12 @@ class DashboardController extends ApiController
             $jenis = 'naik';
         }else{
             $percent_from = $previousMonthly -$monthly;
-            $percent = -($percent_from / $previousMonthly * 100); //decrease percent
+           if ($previousMonthly > 0) {
+    $percent = -$percent_from / $previousMonthly * 100; //decrease percent
+} else {
+    $percent = 0; //decrease percent
+}
+
             $jenis = 'turun';
         }
 
@@ -98,7 +103,7 @@ class DashboardController extends ApiController
         $userPreviousMonthly = User::whereYear('created_at', $tahun_sekarang)
             ->whereMonth('created_at', Carbon::now()->subMonth()->month)->count();
 
-        if($userPreviousMonthly < $userMonthly){
+        if($userPreviousMonthly < $userMonthly ){
             if($userPreviousMonthly >0){
                 $user_precent_from = $userMonthly - $userPreviousMonthly;
                 $user_percent = $user_precent_from / $userPreviousMonthly * 100; //increase user_percent
@@ -108,7 +113,12 @@ class DashboardController extends ApiController
             $user_jenis = 'naik';
         }else{
             $user_percent_from = $userPreviousMonthly -$userMonthly;
-            $user_percent = -($user_percent_from / $userPreviousMonthly * 100); //decrease user_percent
+
+            if ($userPreviousMonthly > 0) {
+    $user_percent = -$user_percent_from / $userPreviousMonthly * 100; //increase user_percent
+} else {
+    $user_percent = 0; //increase user_percent
+}
             $user_jenis = 'turun';
         }
 
@@ -133,7 +143,11 @@ class DashboardController extends ApiController
             $transaction_jenis = 'naik';
         } else {
             $transaction_percent_from = $transactionPrevMonthly -$transactionMonthly;
-            $transaction_percent = -($transaction_percent_from / $transactionPrevMonthly * 100); //decrease transaction_percent
+            if ($transactionPrevMonthly > 0) {
+    $transaction_percent = -$transaction_percent_from / $transactionPrevMonthly * 100; //decrease transaction_percent
+} else {
+    $transaction_percent = 0; //decrease transaction_percent
+}
             $transaction_jenis = 'turun';
         }
 
