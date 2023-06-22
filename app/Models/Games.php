@@ -29,4 +29,14 @@ class Games extends Model
     {
         return $this->hasMany(GamesItem::class, 'game_code', 'code');
     }
+
+    // 1 to N (games -> fields)
+    public function fields()
+    {
+        return $this->hasMany(Fields::class, 'game_code', 'code');
+    }
+     public function redeem()
+    {
+        return $this->hasMany(GamesVoucher::class, 'game_code', 'code');
+    }
 }

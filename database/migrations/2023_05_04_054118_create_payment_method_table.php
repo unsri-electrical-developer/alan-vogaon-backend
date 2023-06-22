@@ -21,7 +21,7 @@ class CreatePaymentMethodTable extends Migration
             $table->string('pm_title');
             $table->string('pm_logo');
             $table->string('from');
-            $table->boolean('isActive')->default(true);
+            $table->integer('status')->default(0);
             $table->timestamps();
         });
     }

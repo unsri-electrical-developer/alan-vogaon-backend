@@ -6,6 +6,7 @@ use App\Http\Controllers\ApiController;
 use App\Http\Controllers\Controller;
 use App\Models\Games;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -21,7 +22,7 @@ class GamesController extends ApiController
         $validate = collect($validation)->flatten();
         return $validate->values()->all();
     }
-    
+
     /**
      * Display a listing of the resource.
      *
@@ -34,7 +35,7 @@ class GamesController extends ApiController
                 $query->where('title', 'like', '%' . $request->search . '%');
             })
             ->when($request->has('category_code'), function ($query) use ($request) {
-                $query->where('category_code', 'like', '%'. $request->category_code . '%');
+                $query->where('category_code', 'like', '%' . $request->category_code . '%');
             })
             ->latest()
             ->get([
@@ -43,7 +44,7 @@ class GamesController extends ApiController
                 'img',
                 'category_code'
             ]);
-        
+
         // Cek img url atau file
         foreach ($games as $item) {
             if (!empty($item->img)) {
@@ -72,49 +73,72 @@ class GamesController extends ApiController
      */
     public function store(Request $request)
     {
-        
-        $validator = $this->validateThis($request, [
-            'img' => 'required',
-            'title' => 'required',
-            'category_code' => 'required'
-        ]);
-        
-        if ($validator->fails()) {
-            return $this->sendError(1, 'Params not complete', $this->validationMessage($validator->errors()));
-        }
 
-        $validated = $validator->validated();
-        $game_code = generateFiledCode('GAMES');
-        $validated['code'] = $game_code;
+        DB::beginTransaction();
 
-        $img_path = uploadFotoWithFileName($request->img, 'GAMES', '/games');
-        $validated['img'] = $img_path;
+        try {
+            $validator = $this->validateThis($request, [
+                'img' => 'required',
+                'title' => 'required',
+                'category_code' => 'required',
+                'kode_game' => 'required'
+            ]);
 
-        $games_data = Games::create($validated);
-        if (!$games_data) {
-            return $this->sendError(0, "Gagal menambah data!", []);
-        }
-        $games_item = [];
-        if ($request->has('games_item')) {
-            $games_item = $request->games_item;
-        }
-        
-        foreach ($games_item as $key => $game) {
-            $game_code = generateFiledCode('GAMESITEM');
-            $games_item[$key]['code'] = $game_code;
-            $games_item[$key]['ag_code'] = 'mobilelegend'; // ??
-            $games_item[$key]['isActive'] = true;
-            $games_item[$key]['from'] = 'apigames'; // ??
-        }
-        
-        $gi_result = $games_data->games_item()->createMany($games_item);
-        
-        if (!$gi_result) {
-            return $this->sendError(0, "Gagal menambah data!", []);
-        }
-        
-        return $this->sendResponse(0, "Berhasil menambah data!", []);
+            if ($validator->fails()) {
+                return $this->sendError(1, 'Params not complete', $this->validationMessage($validator->errors()));
+            }
 
+            $validated = $validator->validated();
+            // $game_code = generateFiledCode('GAMES');
+            $validated['code'] = $request->kode_game;
+
+            $img_path = uploadFotoWithFileName($request->img, 'GAMES', '/games');
+            $validated['img'] = $img_path;
+
+            $games_data = Games::create($validated);
+            if (!$games_data) {
+                return $this->sendError(0, "Gagal menambah data!", []);
+            }
+
+            $product_list = $request->productList;
+            foreach ($product_list as $key => $product) {
+                if (strtolower($product['asal_produk']) === 'unipin' && !array_key_exists('denomination_id', $product)) {
+                    return $this->sendError(2, "Gagal menambah data!", []);
+                }
+                $data = [
+                    'code' => generateFiledCode('GAMES-ITEM'),
+                    'title' => $product['nama'],
+                    'game_code' => $request['kode_game'],
+                    'ag_code' => 'mobilelegends',
+                    'digi_code' => 'mobile_legends',
+                    'price' => $product['harga_member'],
+                    'price_not_member' => $product['harga_non_member'],
+                    'price_unipin' => 0,
+                    'denomination_id' => array_key_exists('denomination_id', $product) && strtolower($product['asal_produk']) === 'unipin' ? $product['denomination_id'] : null,
+                    'isActive' => $product['status_produk'],
+                    'from' => $product['asal_produk']
+                ];
+
+                DB::table('games_item')->insert($data);
+            }
+
+            $field_list = $request->fieldList;
+            foreach ($field_list as $key => $field) {
+                $data = [
+                    'game_code' => $request['kode_game'],
+                    'name' => $field['nama'],
+                    'type' => $field['tipe']
+                ];
+
+                DB::table('fields')->insert($data);
+            }
+
+            DB::commit();
+            return $this->sendResponse(0, "Berhasil menambah data!", []);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->sendError(2, 'Gagal menambahkan data', $e->getMessage());
+        }
     }
 
     /**
@@ -126,7 +150,11 @@ class GamesController extends ApiController
     public function show($id)
     {
         $game = Games::where('code', $id)
-            ->with(['category:category_name,category_code', 'games_item:code,title,price,game_code' ])
+            ->with([
+                'category:category_name,category_code',
+                'games_item:code,title,isActive,from,denomination_id,price,price_not_member,game_code',
+                'fields:name,type,game_code'
+            ])
             ->first([
                 'title',
                 'code',
@@ -136,7 +164,7 @@ class GamesController extends ApiController
                 'created_at',
 
             ]);
-        
+
         if (!$game) {
             return $this->sendError(1, "Data tidak ditemukan", []);
         }
@@ -165,59 +193,79 @@ class GamesController extends ApiController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        $validator = $this->validateThis($request, [
-            'title' => 'required',
-            'category_code' => 'required'
-        ]);
-        
-        if ($validator->fails()) {
-            return $this->sendError(1, 'Params not complete', $this->validationMessage($validator->errors()));
-        }
+        DB::beginTransaction();
+        try {
+            $validator = $this->validateThis($request, [
+                'img' => 'required',
+                'title' => 'required',
+                'category_code' => 'required',
+                'kode_game' => 'required',
+                'id' => 'required'
+            ]);
 
-        $game_data = Games::where('code', $id)->first();
-        if (!$game_data) {
-            return $this->sendError(1, "Data tidak ditemukan1", []);
-        }
-        
-        $validated = $validator->validated();
-
-        if ($request->has('img')) {
-            if (Storage::exists('public' . $game_data->img)) {
-                Storage::delete('public' . $game_data->img);
+            if ($validator->fails()) {
+                return $this->sendError(1, 'Params not complete', $this->validationMessage($validator->errors()));
             }
-            $img_path = uploadFotoWithFileName($request->img, 'GAMES', '/games');
-            $validated['img'] = $img_path;
-        }
 
-        $games_item = [];
-        if ($request->has('games_item')) {
-            $games_item = $request->games_item;
-        }
-        
-        foreach ($games_item as $key => $game) {
-            $game_code = generateFiledCode('GAMESITEM');
-            $games_item[$key]['code'] = $game_code;
-            $games_item[$key]['ag_code'] = 'mobilelegend'; // ??
-            $games_item[$key]['isActive'] = true;
-            $games_item[$key]['from'] = 'apigames'; // ??
-        }
-
-        $result = $game_data->update($validated);
-        
-        if ($result) {
-            $game_data->games_item()->delete();
-        
-            $gi_result = $game_data->games_item()->createMany($games_item);
-            
-            if (!$gi_result) {
-                return $this->sendError(0, "Gagal mengubah data!", []);
+            $game_data = Games::where('code', $request->id)->first();
+            if (!$game_data) {
+                return $this->sendError(1, "Data tidak ditemukan1", []);
             }
-        } else {
-            return $this->sendError(1, "Gagal mengubah data!", []);
+
+            $data_game = [
+                'title' => $request->title,
+                'code' => $request->kode_game,
+                'category_code' => $request->category_code,
+            ];
+
+            if (!str_contains($request->img, 'http')) {
+                $data_game['img'] = uploadFotoWithFileName($request->img, 'GAMES', '/games');
+            }
+
+
+            DB::table('games')->where('code', $request->kode_game)->update($data_game);
+
+            $product_list = $request->productList;
+            DB::table('games_item')->where('game_code', $request['kode_game'])->delete();
+            foreach ($product_list as $key => $product) {
+                $data = [
+                    'code' => generateFiledCode('GAMES-ITEM'),
+                    'title' => $product['title'],
+                    'game_code' => $request['kode_game'],
+                    'ag_code' => 'mobilelegends',
+                    'digi_code' => 'mobile_legends',
+                    'price' => $product['price'],
+                    'price_not_member' => $product['price_not_member'],
+                    'price_unipin' => 0,
+                    'denomination_id' => array_key_exists('denomination_id', $product) && strtolower($product['from']) === 'unipin' ? $product['denomination_id'] : null,
+                    'isActive' => $product['isActive'],
+                    'from' => $product['from']
+                ];
+
+                DB::table('games_item')->insert($data);
+            }
+
+            $field_list = $request->fieldList;
+            DB::table('fields')->where('game_code', $request['kode_game'])->delete();
+            foreach ($field_list as $key => $field) {
+                $data = [
+                    'game_code' => $request['kode_game'],
+                    'name' => $field['name'],
+                    'type' => $field['type']
+                ];
+
+                DB::table('fields')->insert($data);
+            }
+
+
+            DB::commit();
+            return $this->sendResponse(0, "Berhasil mengubah data!", []);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->sendError(1, "Gagal mengubah data!", $e->getMessage());
         }
-        return $this->sendResponse(0, "Berhasil mengubah data!", []);
     }
 
     /**
@@ -229,13 +277,13 @@ class GamesController extends ApiController
     public function destroy($id)
     {
         $game = Games::where('code', $id)->first();
-        
+
         if (!$game) {
             return $this->sendError(1, "Data tidak ditemukan", []);
         }
 
         $game->games_item()->delete();
-        
+
         $result = $game->delete();
 
         if (Storage::exists('public' . $game->img)) {
@@ -245,7 +293,7 @@ class GamesController extends ApiController
         if (!$result) {
             return $this->sendError(1, "Gagal menghapus data!", []);
         }
-        
+
         return $this->sendResponse(0, "Berhasil menghapus data!", []);
     }
 }
