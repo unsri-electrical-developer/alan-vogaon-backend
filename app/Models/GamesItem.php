@@ -27,4 +27,8 @@ class GamesItem extends Model
         return $this->belongsTo(Games::class, 'code', 'game_code', 'category');
         
     }
+    public function redeem()
+    {
+        return $this->hasMany(GamesVoucher::class, 'game_code', 'code');
+    }
 }

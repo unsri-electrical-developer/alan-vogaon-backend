@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\FaqController;
 use App\Http\Controllers\Api\GamesController;
 use App\Http\Controllers\Api\GamesItemController;
+use App\Http\Controllers\Api\GamesVoucherController;
 use App\Http\Controllers\Api\GeneralInfoController;
 use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\PaymentGatewayController;
@@ -45,6 +46,11 @@ Route::group(['prefix' => 'v1', 'middleware' => ['auth:sanctum', 'ability:admin'
 
     // Games
     Route::apiResource('/games', GamesController::class);
+
+    
+    // GamesVoucher
+        Route::apiResource('/game_voucher', GamesVoucherController::class);
+        Route::post('/game_voucher/{game_code}', [GamesVoucherController::class, 'store']);
 
     // Sliders
     Route::apiResource('/sliders', SlidersController::class);
