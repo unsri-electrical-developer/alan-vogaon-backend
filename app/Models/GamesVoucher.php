@@ -12,12 +12,10 @@ class GamesVoucher extends Model
     protected $table = 'games_item_voucher';
 
     protected $fillable = [
-        'detail_product_code',
         'redeem_code',
-        'code',
         'game_code',
-        'status',
-        'game_item_code'
+        'voucher_status',
+        'item_code'
     ];
 
    public function game()
@@ -28,7 +26,7 @@ class GamesVoucher extends Model
 
      public function games_item()
     {
-        return $this->belongsTo(GamesItem::class, 'code', 'game_item_code');
+        return $this->belongsTo(GamesItem::class, 'code', 'item_code');
         
     }
 

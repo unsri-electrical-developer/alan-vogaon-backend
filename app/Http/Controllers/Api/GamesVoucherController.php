@@ -49,10 +49,9 @@ class GamesVoucherController extends ApiController
             foreach ($redeems as $redeem) {
                 $data = [
                     'game_code' => $game_code,
-                    'game_item_code' => $key,
+                    'item_code' => $key,
                     'redeem_code' => $redeem['redeem_code'],
-                    'status' => $redeem['status'],
-                    'code' => generateFiledCode('GAMES-VOUCHER'),
+                    'voucher_status' => $redeem['voucher_status'],
                 ];
 
                 GamesVoucher::create($data);
@@ -79,7 +78,7 @@ class GamesVoucherController extends ApiController
     {
         $gamesVouchers = GamesVoucher::where('game_code', $id)
                 ->get()
-                ->groupBy('game_item_code');
+                ->groupBy('item_code');
 
         
         if (!$gamesVouchers ) {
@@ -112,14 +111,13 @@ public function update(Request $request, $game_code)
 
         $redeem_list = $request->data;
 
-        foreach ($redeem_list as $game_item_code => $redeems) {
+        foreach ($redeem_list as $item_code => $redeems) {
             foreach ($redeems as $redeem) {
                 $data = [
                     'game_code' => $game_code,
-                    'game_item_code' => $game_item_code,
+                    'item_code' => $item_code,
                     'redeem_code' => $redeem['redeem_code'],
-                    'status' => $redeem['status'],
-                    'code' => generateFiledCode('GAMES-VOUCHER'),
+                    'voucher_status' => $redeem['voucher_status'],
                 ];
 
                 GamesVoucher::create($data);
