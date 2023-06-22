@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\PaymentGatewayController;
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\PrivacyPolicyController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\PromoController;
 use App\Http\Controllers\Api\RiwayatPembelianController;
 use App\Http\Controllers\Api\RiwayatTopUpController;
 use App\Http\Controllers\Api\SlidersController;
@@ -38,6 +39,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['auth:sanctum', 'ability:admin'
 
     // Users
     Route::apiResource('/users', UserController::class);
+    Route::post('/users/pin/change', [UserController::class, 'changeUserPin']);
 
     // Category
     Route::apiResource('/category', CategoryController::class);
@@ -98,5 +100,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['auth:sanctum', 'ability:admin'
     // Profile
     Route::patch('/profile/edit_profile', [ProfileController::class, 'editProfile']);
     Route::get('/profile/get_profile', [ProfileController::class, 'getProfile']);
+
+    // KODE PROMO
+    Route::get('/promo', [PromoController::class, 'getPromo']);
+    Route::get('/promo/{code}', [PromoController::class, 'getDetailPromo']);
+    Route::post('/promo/add', [PromoController::class, 'addPromo']);
+    Route::post('/promo/edit', [PromoController::class, 'editPromo']);
+    Route::post('/promo/edit/status', [PromoController::class, 'updateStatusPromo']);
+    Route::delete('/promo/delete/{code}', [PromoController::class, 'deletePromo']);
 
 });

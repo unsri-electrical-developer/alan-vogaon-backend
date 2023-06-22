@@ -16,8 +16,8 @@
 
 
 -- Membuang struktur basisdata untuk vogaon
-CREATE DATABASE IF NOT EXISTS `vogaon` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */;
-USE `vogaon`;
+CREATE DATABASE IF NOT EXISTS `alancreative_vogaon` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */;
+USE `alancreative_vogaon`;
 
 -- membuang struktur untuk table vogaon.carts
 CREATE TABLE IF NOT EXISTS `carts` (

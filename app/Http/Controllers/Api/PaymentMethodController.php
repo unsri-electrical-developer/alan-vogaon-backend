@@ -33,7 +33,10 @@ class PaymentMethodController extends ApiController
         ->when($request->has('search'), function ($query) use ($request) {
             $query->where('pm_title', 'like', '%' . $request->search . '%');
         })
-        ->get(['pm_title', 'pm_code', 'pm_logo', 'from', 'isActive', 'created_at']);
+        ->when($request->has('static'), function ($query) use ($request) {
+            $query->where('status', 1);
+        })
+        ->get(['pm_title', 'pm_code', 'pm_logo', 'from', 'status', 'created_at']);
 
         foreach ($payment_methods as $item) {
             if (!filter_var($item->pm_logo, FILTER_VALIDATE_URL)) {
@@ -44,6 +47,9 @@ class PaymentMethodController extends ApiController
                 } else {
                     $item->pm_logo = null;
                 }
+            }
+            if ($request->has('static')) {
+                $item->status = 0;
             }
         }
 
@@ -82,7 +88,7 @@ class PaymentMethodController extends ApiController
         $validated['pm_logo'] = $img_path;
 
         $validated['from'] = $request->from;
-        $validated['isActive'] = true;
+        $validated['status'] = 1;
 
         $result = PaymentMethod::create($validated);
         if ($result) {
@@ -210,19 +216,17 @@ class PaymentMethodController extends ApiController
             return $this->sendError(1, "Data tidak ditemukan!", []);
         }
 
-        $validated = $validator->validated();
-
-        $result = $payment_method->update($validated);
+        $result = $payment_method->update(['status' => $request->isActive]);
         if ($result) {
             $data = [
                 'pm_code' => $pm_code,
-                'isActive' => $request->isActive
+                'status' => $request->isActive
             ];
             return $this->sendResponse(0, "Berhasil mengubah isActive!", $data);
         } else {
             $data = [
                 'pm_code' => $pm_code,
-                'isActive' => $payment_method->isActive
+                'status' => $payment_method->isActive
             ];
             return $this->sendError(1, "Gagal mengubah isActive!", $data);
         }
