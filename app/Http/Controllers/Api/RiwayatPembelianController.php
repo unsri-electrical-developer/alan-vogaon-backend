@@ -80,45 +80,49 @@ class RiwayatPembelianController extends ApiController
             $select = [
                 'transaction.transaction_code',
                 'users.name',
+                'users.email',
                 'transaction.created_at',
                 'transaction.status',
                 'payment_method.pm_title as payment_method',
                 'transaction.no_reference'
             ];
-            $data = Transaction::where('transaction_code', $kode_transaksi)
-                ->with([
-                    'users:name,users_code',
-                    'payment_method:pm_title,pm_code'
-                ])
-                // ->join('users', 'transaction.users_code', '=', 'users.users_code')
-                // ->join('payment_method', 'payment_method.pm_code', '=', 'transaction.payment_method')
-                ->select($select)
-                ->first();
+            $data = Transaction::select($select)
+            ->join('users', 'transaction.users_code', '=', 'users.users_code')
+            ->join('payment_method', 'payment_method.pm_code', '=', 'transaction.payment_method')
+            ->where('transaction.transaction_code', $kode_transaksi)
+            ->first();
 
             if (!$data) {
                 return $this->sendError(1, "Data tidak ditemukan!", []);
             }
-
+            
             $product_list = TransactionDetail::select([
                 'games.title as games_title',
                 'games_item.title as item_title',
-                'games_item.code'
-            ])
+                'transaction_detail.price',
+                'transaction_detail.userid',
+                'transaction.from',
+                'transaction.status',
+                ])
                 ->join('games_item', 'transaction_detail.item_code', '=', 'games_item.code')
                 ->join('games', 'games_item.game_code', '=', 'games.code')
-                ->where('transaction_code', $data->transaction_code)
+                ->join('transaction', 'transaction.transaction_code', '=', 'transaction_detail.transaction_code')
+                ->where('transaction.transaction_code', $data->transaction_code)
+                ->distinct()
                 ->latest('transaction_detail.created_at')->get();
 
-            $data->tanggal = $data->created_at->format('d/m/Y');
-
-            $product_array = [];
-            if ($product_list) {
-                foreach ($product_list as $item) {
-                    $product_array[] = $item->games_title . ' ' . $item->item_title;
-                }
+            $sum_price = 0;
+            foreach ($product_list as $item) {
+                $sum_price += $item->price;
+                $item->games_title .= ' - ' . $item->item_title;
             }
+            
 
-            $data->product_list = $product_array;
+            $data->totalPembelianTransaksi = $sum_price;
+            
+            $data->tanggal = $data->created_at->format('d/m/Y');
+            
+            $data->product_list = $product_list;
 
             return $this->sendResponse(0, "Sukses", $data);
         } catch (\Exception $e) {
