@@ -16,6 +16,6 @@ class PaymentMethod extends Model
         'pm_title',
         'pm_logo',
         'from',
-        'isActive'
+        'status'
     ];
 }
