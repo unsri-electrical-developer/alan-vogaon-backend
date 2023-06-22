@@ -31,27 +31,25 @@ class GamesVoucherController extends ApiController
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request, $game_code)
-    {
-        DB::beginTransaction();
+{
+    DB::beginTransaction();
 
-        try {
-            $validator = $this->validateThis($request, [
-                'data' => 'required|array',
-                'data.*.redeem_code' => 'required',
-                'data.*.status' => 'required',
-                'data.*.game_item_code' => 'required',
-            ]);
+    try {
+        $validator = $this->validateThis($request, [
+            'data' => 'required|array',
+        ]);
 
-            if ($validator->fails()) {
-                return $this->sendError(1, 'Params not complete', $this->validationMessage($validator->errors()));
-            }
+        if ($validator->fails()) {
+            return $this->sendError(1, 'Params not complete', $this->validationMessage($validator->errors()));
+        }
 
-            $redeem_list = $request->data;
+        $redeem_list = $request->data;
 
-            foreach ($redeem_list as $key => $redeem) {
+        foreach ($redeem_list as $key => $redeems) {
+            foreach ($redeems as $redeem) {
                 $data = [
                     'game_code' => $game_code,
-                    'game_item_code' => $redeem['game_item_code'],
+                    'game_item_code' => $key,
                     'redeem_code' => $redeem['redeem_code'],
                     'status' => $redeem['status'],
                     'code' => generateFiledCode('GAMES-VOUCHER'),
@@ -59,14 +57,16 @@ class GamesVoucherController extends ApiController
 
                 GamesVoucher::create($data);
             }
-
-            DB::commit();
-            return $this->sendResponse(0, "Berhasil menambah data!", []);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return $this->sendError(2, 'Gagal menambahkan data', $e->getMessage());
         }
+
+        DB::commit();
+        return $this->sendResponse(0, "Berhasil menambah data!", []);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return $this->sendError(2, 'Gagal menambahkan data', $e->getMessage());
     }
+}
+
 
 
     /**
@@ -77,11 +77,15 @@ class GamesVoucherController extends ApiController
      */
     public function show( $id)
     {
-        $games_item = GamesVoucher::where('game_code', $id)->get();
-        if (!$games_item) {
+        $gamesVouchers = GamesVoucher::where('game_code', $id)
+                ->get()
+                ->groupBy('game_item_code');
+
+        
+        if (!$gamesVouchers ) {
             return $this->sendError(1, "Data tidak ditemukan!", []);
         }
-        return $this->sendResponse(0, "Sukses", $games_item);
+        return $this->sendResponse(0, "Sukses", $gamesVouchers );
     }
 
     /**
@@ -96,11 +100,8 @@ public function update(Request $request, $game_code)
     DB::beginTransaction();
 
     try {
-        $validator = $this->validateThis($request, [
+      $validator = $this->validateThis($request, [
             'data' => 'required|array',
-            'data.*.redeem_code' => 'required',
-            'data.*.status' => 'required',
-            'data.*.game_item_code' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -111,18 +112,19 @@ public function update(Request $request, $game_code)
 
         $redeem_list = $request->data;
 
-        foreach ($redeem_list as $key => $redeem) {
-            $data = [
-                'game_code' => $game_code,
-                'code' => generateFiledCode('GAMES-VOUCHER'),
-                'game_item_code' => $redeem['game_item_code'],
-                'redeem_code' => $redeem['redeem_code'],
-                'status' => $redeem['status'],
-            ];
+        foreach ($redeem_list as $game_item_code => $redeems) {
+            foreach ($redeems as $redeem) {
+                $data = [
+                    'game_code' => $game_code,
+                    'game_item_code' => $game_item_code,
+                    'redeem_code' => $redeem['redeem_code'],
+                    'status' => $redeem['status'],
+                    'code' => generateFiledCode('GAMES-VOUCHER'),
+                ];
 
-            GamesVoucher::create($data);
+                GamesVoucher::create($data);
+            }
         }
-
         DB::commit();
         return $this->sendResponse(0, "Data updated successfully!", []);
     } catch (\Exception $e) {
