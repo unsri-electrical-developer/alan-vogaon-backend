@@ -102,6 +102,9 @@ class GamesController extends ApiController
 
             $product_list = $request->productList;
             foreach ($product_list as $key => $product) {
+                if (strtolower($product['asal_produk']) === 'unipin' && !array_key_exists('denomination_id', $product)) {
+                    return $this->sendError(2, "Gagal menambah data!", []);
+                }
                 $data = [
                     'code' => generateFiledCode('GAMES-ITEM'),
                     'title' => $product['nama'],
@@ -111,7 +114,7 @@ class GamesController extends ApiController
                     'price' => $product['harga_member'],
                     'price_not_member' => $product['harga_non_member'],
                     'price_unipin' => 0,
-                    'denomination_id' => $product['denomination_id'],
+                    'denomination_id' => array_key_exists('denomination_id', $product) && strtolower($product['asal_produk']) === 'unipin' ? $product['denomination_id'] : null,
                     'isActive' => $product['status_produk'],
                     'from' => $product['asal_produk']
                 ];
@@ -211,16 +214,18 @@ class GamesController extends ApiController
                 return $this->sendError(1, "Data tidak ditemukan1", []);
             }
 
-            DB::table('games')->where('code', $request->kode_game)->delete();
-
             $data_game = [
-                'img' => uploadFotoWithFileName($request->img, 'GAMES', '/games'),
                 'title' => $request->title,
                 'code' => $request->kode_game,
                 'category_code' => $request->category_code,
             ];
 
-            DB::table('games')->insert($data_game);
+            if (!str_contains($request->img, 'http')) {
+                $data_game['img'] = uploadFotoWithFileName($request->img, 'GAMES', '/games');
+            }
+
+
+            DB::table('games')->where('code', $request->kode_game)->update($data_game);
 
             $product_list = $request->productList;
             DB::table('games_item')->where('game_code', $request['kode_game'])->delete();
@@ -234,7 +239,7 @@ class GamesController extends ApiController
                     'price' => $product['price'],
                     'price_not_member' => $product['price_not_member'],
                     'price_unipin' => 0,
-                    'denomination_id' => $product['denomination_id'],
+                    'denomination_id' => array_key_exists('denomination_id', $product) && strtolower($product['from']) === 'unipin' ? $product['denomination_id'] : null,
                     'isActive' => $product['isActive'],
                     'from' => $product['from']
                 ];
