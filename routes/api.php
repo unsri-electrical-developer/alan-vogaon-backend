@@ -27,6 +27,7 @@ use PharIo\Manifest\AuthorCollection;
 
 Route::group(['prefix' => 'v1'], function () {
     Route::get('/', [TestController::class, 'test']);
+    Route::post('/test', [TestController::class, 'test']);
     Route::post('/login', [AuthController::class, 'login']);
 });
 

@@ -9,15 +9,15 @@ use Illuminate\Support\Facades\Validator;
 
 class TestController extends ApiController
 {
-     public function __construct()
+    public function __construct()
     {
     }
 
-    public function test ()
+    public function test(Request $request)
     {
-      return response()->json([
-            'message' => 'Hello World',
-        ], 200);
+        $img = uploadFotoToGStorage($request->file, 'FOTO', 'test');
+        // dd($img);
+        return $this->sendResponse(200, 'Success', $img);
     }
 
     public function validateThis($request, $rules = array())
