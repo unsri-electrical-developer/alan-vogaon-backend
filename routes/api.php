@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\SlidersController;
 use App\Http\Controllers\Api\SyaratKetentuanController;
 use App\Http\Controllers\Api\TestController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\ApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -47,10 +48,10 @@ Route::group(['prefix' => 'v1', 'middleware' => ['auth:sanctum', 'ability:admin'
     // Games
     Route::apiResource('/games', GamesController::class);
 
-    
+
     // GamesVoucher
-        Route::apiResource('/game_voucher', GamesVoucherController::class);
-        Route::post('/game_voucher/{game_code}', [GamesVoucherController::class, 'store']);
+    Route::apiResource('/game_voucher', GamesVoucherController::class);
+    Route::post('/game_voucher/{game_code}', [GamesVoucherController::class, 'store']);
 
     // Sliders
     Route::apiResource('/sliders', SlidersController::class);
@@ -109,4 +110,10 @@ Route::group(['prefix' => 'v1', 'middleware' => ['auth:sanctum', 'ability:admin'
     Route::post('/promo/edit/status', [PromoController::class, 'updateStatusPromo']);
     Route::delete('/promo/delete/{code}', [PromoController::class, 'deletePromo']);
 
+    // Admin
+    Route::get('/admin', [AdminController::class, 'getAdmin']);
+    Route::get('/admin/{code}', [AdminController::class, 'getDetailAdmin']);
+    Route::post('/admin/add', [AdminController::class, 'addAdmin']);
+    Route::post('/admin/edit', [AdminController::class, 'editAdmin']);
+    Route::delete('/admin/delete/{code}', [AdminController::class, 'deleteAdmin']);
 });
