@@ -42,7 +42,8 @@ class PaymentMethodController extends ApiController
             if (!filter_var($item->pm_logo, FILTER_VALIDATE_URL)) {
                 $file_path = storage_path('app/public' . $item->pm_logo);
                 if (file_exists($file_path)) {
-                    $file_url = asset('storage' . $item->pm_logo);
+                    // $file_url = asset('storage' . $item->pm_logo);
+                    $file_url = env('ADMIN_DOMAIN') .  $item->pm_logo;
                     $item->pm_logo = $file_url;
                 } else {
                     $item->pm_logo = null;
@@ -113,7 +114,8 @@ class PaymentMethodController extends ApiController
         }
 
         if (!filter_var($payment_method->pm_logo, FILTER_VALIDATE_URL)) {
-            $file_url = asset('storage' . $payment_method->pm_logo);
+            // $file_url = asset('storage' . $payment_method->pm_logo);
+            $file_url = env('ADMIN_DOMAIN') . $payment_method->pm_logo;
             $payment_method->pm_logo = $file_url;
         }
 
