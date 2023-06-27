@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -16,15 +17,23 @@ class TestController extends ApiController
 
     public function getImage($folder = '', $img)
     {
-        $file_name = $img;
-        $storagePath  = Storage::disk('public')->getDriver()->getAdapter()->getPathPrefix();
-        $fullPath = $storagePath . '/';
-        if ($folder) {
-            $fullPath .= $folder.'/';
+        try {
+            $file_name = $img;
+            $storagePath  = Storage::disk('public')->getDriver()->getAdapter()->getPathPrefix();
+            $fullPath = $storagePath . '/';
+            if ($folder) {
+                $fullPath .= $folder . '/';
+            }
+            $fullPath .= $file_name;
+
+            return $this->sendResponseFile($fullPath);
+        } catch (\Exception $e) {
+            $file_name = 'default.png';
+            $storagePath  = public_path();
+            $fullPath = $storagePath . '/def/'.$file_name;
+            
+            return $this->sendResponseFile($fullPath);
         }
-        $fullPath .= $file_name;
-        
-        return $this->sendResponseFile($fullPath);
     }
 
     public function test(Request $request)
