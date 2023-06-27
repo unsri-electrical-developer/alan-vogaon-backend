@@ -73,7 +73,7 @@ class GamesController extends ApiController
      */
     public function store(Request $request)
     {
-
+        // return $this->sendError(1, "Params not complete", $request->all());
         DB::beginTransaction();
 
         try {
@@ -81,7 +81,10 @@ class GamesController extends ApiController
                 'img' => 'required',
                 'title' => 'required',
                 'category_code' => 'required',
-                'kode_game' => 'required'
+                'kode_game' => 'required',
+                'game_description' => 'required',
+                'field_description' => 'required',
+                'field_img' => 'required',
             ]);
 
             if ($validator->fails()) {
@@ -94,6 +97,10 @@ class GamesController extends ApiController
 
             $img_path = uploadFotoWithFileName($request->img, 'GAMES', '/games');
             $validated['img'] = $img_path;
+            
+            // field_img
+            $img_field_path = uploadFotoWithFileName($request->field_img, 'GAMES', '/games');
+            $validated['field_img'] = $img_field_path;
 
             $games_data = Games::create($validated);
             if (!$games_data) {
