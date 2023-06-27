@@ -56,6 +56,11 @@ class ApiController extends Controller
         return response()->json($response, 401);
     }
 
+    public function sendResponseFile($path)
+    {
+        return response()->file($path);
+    }
+
     public function normalize_result($result)
     {
 

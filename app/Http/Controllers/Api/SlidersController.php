@@ -33,7 +33,8 @@ class SlidersController extends ApiController
 
         foreach ($sliders as $item) {
             if (!filter_var($item->image, FILTER_VALIDATE_URL)) {
-                $file_url = asset('storage' . $item->image);
+                // $file_url = asset('storage' . $item->image);
+                $file_url = env('ADMIN_DOMAIN') . $item->image;
                 $item->image = $file_url;
             }
         }
@@ -81,7 +82,8 @@ class SlidersController extends ApiController
         }
 
         if (!filter_var($slider->image, FILTER_VALIDATE_URL)) {
-            $file_url = asset('storage' . $slider->image);
+            // $file_url = asset('storage' . $slider->image);
+            $file_url = env('ADMIN_DOMAIN') . $slider->image;
             $slider->image = $file_url;
         }
 
