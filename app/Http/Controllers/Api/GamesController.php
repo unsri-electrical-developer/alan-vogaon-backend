@@ -74,7 +74,7 @@ class GamesController extends ApiController
      */
     public function store(Request $request)
     {
-        // return $this->sendError(1, "Params not complete", $request->all());
+        // return $this->sendError(1, "test", $request->all());
         DB::beginTransaction();
 
         try {
@@ -121,6 +121,7 @@ class GamesController extends ApiController
                     'digi_code' => 'mobile_legends',
                     'price' => $product['harga_member'],
                     'price_not_member' => $product['harga_non_member'],
+                    'price_reseller' => $product['harga_reseller'],
                     'price_unipin' => 0,
                     'denomination_id' => array_key_exists('denomination_id', $product) && strtolower($product['asal_produk']) === 'unipin' ? $product['denomination_id'] : null,
                     'isActive' => $product['status_produk'],
@@ -160,7 +161,7 @@ class GamesController extends ApiController
         $game = Games::where('code', $id)
             ->with([
                 'category:category_name,category_code',
-                'games_item:code,title,isActive,from,denomination_id,price,price_not_member,game_code',
+                'games_item:code,title,isActive,from,denomination_id,price,price_not_member,price_reseller,game_code',
                 'fields:name,type,game_code'
             ])
             ->first([
@@ -168,9 +169,11 @@ class GamesController extends ApiController
                 'code',
                 'code as game_code',
                 'img',
+                'field_img',
+                'field_description',
+                'game_description',
                 'category_code',
                 'created_at',
-
             ]);
 
         if (!$game) {
@@ -204,6 +207,7 @@ class GamesController extends ApiController
      */
     public function update(Request $request)
     {
+        // return $this->sendError(1, "Params not complete", $request->all());
         DB::beginTransaction();
         try {
             $validator = $this->validateThis($request, [
@@ -211,14 +215,17 @@ class GamesController extends ApiController
                 'title' => 'required',
                 'category_code' => 'required',
                 'kode_game' => 'required',
-                'id' => 'required'
+                'id' => 'required',
+                'field_img' => 'required',
+                'field_description' => 'required',
+                'game_description' => 'required',
             ]);
 
             if ($validator->fails()) {
                 return $this->sendError(1, 'Params not complete', $this->validationMessage($validator->errors()));
             }
 
-            $game_data = Games::where('code', $request->id)->first();
+            $game_data = Games::where('code', $request->id)->first();   
             if (!$game_data) {
                 return $this->sendError(1, "Data tidak ditemukan1", []);
             }
@@ -227,10 +234,16 @@ class GamesController extends ApiController
                 'title' => $request->title,
                 'code' => $request->kode_game,
                 'category_code' => $request->category_code,
+                'field_description' => $request->field_description,
+                'game_description' => $request->game_description,
             ];
 
             if (!str_contains($request->img, 'http')) {
                 $data_game['img'] = uploadFotoWithFileName($request->img, 'GAMES', '/games');
+            }
+
+            if (!str_contains($request->field_img, 'http')) {
+                $data_game['field_img'] = uploadFotoWithFileName($request->img, 'GAMES', '/games');
             }
 
 
@@ -247,6 +260,7 @@ class GamesController extends ApiController
                     'digi_code' => 'mobile_legends',
                     'price' => $product['price'],
                     'price_not_member' => $product['price_not_member'],
+                    'price_reseller' => $product['price_reseller'],
                     'price_unipin' => 0,
                     'denomination_id' => array_key_exists('denomination_id', $product) && strtolower($product['from']) === 'unipin' ? $product['denomination_id'] : null,
                     'isActive' => $product['isActive'],
