@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -12,47 +13,29 @@ class AdminController extends ApiController
 {
     public function getAdmin(Request $request)
     {
+        $admin_id = Auth::user()->id;
         $data = DB::table('admins')
-            ->select(['admin_profile_pic', 'created_at', 'email', 'id', 'name', 'updated_at'])
+            ->select(['created_at', 'email', 'id', 'name', 'updated_at'])
             ->where('name', 'like', '%' . $request->search . '%')
             ->get();
 
-        foreach ($data as $item) {
-            if (!empty($item->admin_profile_pic)) {
-                if (!filter_var($item->admin_profile_pic, FILTER_VALIDATE_URL)) {
-                    $file_path = storage_path('app/public' . $item->admin_profile_pic);
-                    if (file_exists($file_path)) {
-                        $file_url = asset('storage' . $item->admin_profile_pic);
-                        $item->admin_profile_pic = $file_url;
-                    } else {
-                        $item->admin_profile_pic = null;
-                    }
-                }
-            } else {
-                $item->img = null;
+        $data_send = [];
+
+        foreach ($data as $key => $admin) {
+            if ($admin->id != $admin_id) {
+                array_push($data_send, $admin);
             }
         }
 
-        return $this->sendResponse(0, 'Berhasil', $data);
+        return $this->sendResponse(0, 'Berhasil', $data_send);
     }
 
     public function getDetailAdmin($code)
     {
-        $admin = DB::table('admins')->where('id', $code)->first();
-        
-        if (!empty($admin->admin_profile_pic)) {
-                if (!filter_var($admin->admin_profile_pic, FILTER_VALIDATE_URL)) {
-                    $file_path = storage_path('app/public' . $admin->admin_profile_pic);
-                    if (file_exists($file_path)) {
-                        $file_url = asset('storage' . $admin->admin_profile_pic);
-                        $admin->admin_profile_pic = $file_url;
-                    } else {
-                        $admin->admin_profile_pic = null;
-                    }
-                }
-            } else {
-                $admin->img = null;
-            }
+        $admin = DB::table('admins')
+            ->where('id', $code)
+            ->select(['created_at', 'email', 'id', 'name', 'updated_at'])
+            ->first();
 
         return $this->sendResponse(0, 'Berhasil', $admin);
     }
@@ -68,10 +51,6 @@ class AdminController extends ApiController
                 'password' => Hash::make($request->password),
                 'created_at' => date('Y-m-d')
             ];
-
-            if (!empty($request->img)) {
-                $data['admin_profile_pic'] = uploadFotoWithFileName($request->img, 'ADMIN', '/admins');
-            }
 
             $data = DB::table('admins')->insert($data);
 
@@ -95,10 +74,6 @@ class AdminController extends ApiController
                 'updated_at' => date('Y-m-d')
             ];
 
-            if (!str_contains($request->img, 'http') && !empty($request->img)) {
-                $data['admin_profile_pic'] = uploadFotoWithFileName($request->img, 'ADMIN', '/admins');
-            }
-
             if (!empty($request->password)) {
                 $data['password'] = Hash::make($request->password);
             }
@@ -117,7 +92,7 @@ class AdminController extends ApiController
     {
         DB::beginTransaction();
         try {
-            $data = DB::table('admins')->where('id', $code)->delete();
+            DB::table('admins')->where('id', $code)->delete();
 
             DB::commit();
             return $this->sendResponse(0, 'Berhasil', []);
