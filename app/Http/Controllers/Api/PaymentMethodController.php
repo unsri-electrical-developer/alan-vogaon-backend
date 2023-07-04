@@ -36,7 +36,7 @@ class PaymentMethodController extends ApiController
         ->when($request->has('static'), function ($query) use ($request) {
             $query->where('status', 1);
         })
-        ->get(['pm_title', 'pm_code', 'pm_logo', 'from', 'status', 'created_at']);
+        ->get(['pm_title', 'pm_code', 'pm_logo', 'from', 'status', 'min_order', 'fee', 'created_at']);
 
         foreach ($payment_methods as $item) {
             if (!filter_var($item->pm_logo, FILTER_VALIDATE_URL)) {
@@ -69,7 +69,9 @@ class PaymentMethodController extends ApiController
             'pm_title' => 'required',
             'pm_code' => 'required|unique:payment_method,pm_code',
             'pm_logo' => 'required',
-            'from' => 'required'
+            'from' => 'required',
+            'min_order' => 'required',
+            'fee' => 'required',
         ]);
         
         if ($validator->fails()) {
@@ -135,6 +137,8 @@ class PaymentMethodController extends ApiController
             'pm_title' => 'required',
             'pm_logo' => 'required',
             'pm_code' => 'required',
+            'min_order' => 'required',
+            'fee' => 'required',
             'from' => 'required',
         ]);
         
@@ -169,7 +173,7 @@ class PaymentMethodController extends ApiController
         $result = $payment_method->update($validated);
 
         if ($result) {
-            return $this->sendResponse(0, "Berhasil mengubah data!", []);
+            return $this->sendResponse(0, "Berhasil mengubah data!", $validated);
         } else {
             return $this->sendError(1, "Gagal mengubah data!", []);
         }

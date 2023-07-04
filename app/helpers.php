@@ -116,6 +116,19 @@ if (!function_exists('uploadFotoToGStorage')) {
     }
 }
 
+if (!function_exists('getImage')) {
+    function getImage($file, $icon = false)
+    {
+        if (empty($file)) {
+            if ($icon) {
+                return asset('/images/icon.png');
+            }
+            return asset('/images/default.png');
+        }
+        return env('ADMIN_DOMAIN') . $file;
+    }
+}
+
 /*
  *  Remove whitespace, special character, and turn string to lower case
  */

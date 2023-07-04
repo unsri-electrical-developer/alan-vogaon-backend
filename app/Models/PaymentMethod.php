@@ -16,6 +16,8 @@ class PaymentMethod extends Model
         'pm_title',
         'pm_logo',
         'from',
-        'status'
+        'status',
+        'min_order',
+        'fee'
     ];
 }
