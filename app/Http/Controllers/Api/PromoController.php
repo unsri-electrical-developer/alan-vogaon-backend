@@ -42,10 +42,11 @@ class PromoController extends ApiController
             'voucher_discount' => $request->discount,
             'voucher_discount_max' => $request->discount_max,
             'con_payment_method' => $request->con_payment_method,
-            'voucher_start' => $request->start,
-            'voucher_end' => $request->end,
+            'voucher_start' => date('Y-m-d', strtotime($request->start)),
+            'voucher_end' => date('Y-m-d', strtotime($request->end)),
             'isActive' => 1
         ];
+        
         if ($request->con_payment_method) {
             $pm = $request->payment_method;
             foreach ($pm as $key => $value) {
