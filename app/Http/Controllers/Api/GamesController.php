@@ -49,14 +49,14 @@ class GamesController extends ApiController
         foreach ($games as $item) {
             if (!empty($item->img)) {
                 if (!filter_var($item->img, FILTER_VALIDATE_URL)) {
-                    $file_path = storage_path('app/public' . $item->img);
-                    if (file_exists($file_path)) {
+                    // $file_path = storage_path('app/public' . $item->img);
+                    // if (file_exists($file_path)) {
                         // $file_url = asset('storage' . $item->img);
                         $file_url = env('ADMIN_DOMAIN') . $item->img;
                         $item->img = $file_url;
-                    } else {
-                        $item->img = null;
-                    }
+                    // } else {
+                    //     $item->img = null;
+                    // }
                 }
             } else {
                 $item->img = null;
@@ -182,14 +182,14 @@ class GamesController extends ApiController
 
         if (!empty($game->img)) {
             if (!filter_var($game->img, FILTER_VALIDATE_URL)) {
-                $file_path = storage_path('app/public' . $game->img);
-                if (file_exists($file_path)) {
+                // $file_path = storage_path('app/public' . $game->img);
+                // if (file_exists($file_path)) {
                     // $file_url = asset('storage' . $game->img);
                     $file_url = env('ADMIN_DOMAIN') . $game->img;
                     $game->img = $file_url;
-                } else {
-                    $game->img = null;
-                }
+                // } else {
+                //     $game->img = null;
+                // }
             }
         } else {
             $game->img = null;

@@ -77,15 +77,15 @@ class ProfileController extends ApiController
 
         if (!empty($admin->admin_profile_pic)) {
             if (!filter_var($admin->admin_profile_pic, FILTER_VALIDATE_URL)) {
-                $file_path = storage_path('app/public' . $admin->admin_profile_pic);
-                if (file_exists($file_path)) {
+                // $file_path = storage_path('app/public' . $admin->admin_profile_pic);
+                // if (file_exists($file_path)) {
                     // $file_url = asset('storage' . $admin->admin_profile_pic);
                     $file_url = env('ADMIN_DOMAIN') . $admin->admin_profile_pic;
                     $admin->admin_profile_pic = $file_url;
-                } else {
-                    $admin->admin_profile_pic = null;
+                // } else {
+                //     $admin->admin_profile_pic = null;
                     
-                }
+                // }
             }
         } else {
             $admin->admin_profile_pic = null;

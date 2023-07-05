@@ -40,14 +40,14 @@ class PaymentMethodController extends ApiController
 
         foreach ($payment_methods as $item) {
             if (!filter_var($item->pm_logo, FILTER_VALIDATE_URL)) {
-                $file_path = storage_path('app/public' . $item->pm_logo);
-                if (file_exists($file_path)) {
+                // $file_path = storage_path('app/public' . $item->pm_logo);
+                // if (file_exists($file_path)) {
                     // $file_url = asset('storage' . $item->pm_logo);
                     $file_url = env('ADMIN_DOMAIN') .  $item->pm_logo;
                     $item->pm_logo = $file_url;
-                } else {
-                    $item->pm_logo = null;
-                }
+                // } else {
+                //     $item->pm_logo = null;
+                // }
             }
             if ($request->has('static')) {
                 $item->status = 0;

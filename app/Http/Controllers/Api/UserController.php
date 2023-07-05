@@ -31,14 +31,14 @@ class UserController extends ApiController
         foreach ($users as $item) {
             if (!empty($item->users_profile_pic)) {
                 if (!filter_var($item->users_profile_pic, FILTER_VALIDATE_URL)) {
-                    $file_path = storage_path('app/public' . $item->users_profile_pic);
-                    if (file_exists($file_path)) {
+                    // $file_path = storage_path('app/public' . $item->users_profile_pic);
+                    // if (file_exists($file_path)) {
                         // $file_url = asset('storage' . $item->users_profile_pic);
                         $file_url = env('ADMIN_DOMAIN') . $item->users_profile_pic;
                         $item->users_profile_pic = $file_url;
-                    } else {
-                        $item->users_profile_pic = null;
-                    }
+                    // } else {
+                    //     $item->users_profile_pic = null;
+                    // }
                 }
             } else {
                 $item->users_profile_pic = null;
@@ -86,14 +86,14 @@ class UserController extends ApiController
 
         if (!empty($user->users_profile_pic)) {
             if (!filter_var($user->users_profile_pic, FILTER_VALIDATE_URL)) {
-                $file_path = storage_path('app/public' . $user->users_profile_pic);
-                if (file_exists($file_path)) {
+                // $file_path = storage_path('app/public' . $user->users_profile_pic);
+                // if (file_exists($file_path)) {
                     // $file_url = asset('storage' . $user->users_profile_pic);
                     $file_url = env('ADMIN_DOMAIN') . $user->users_profile_pic;
                     $user->users_profile_pic = $file_url;
-                } else {
-                    $user->users_profile_pic = null;
-                }
+                // } else {
+                //     $user->users_profile_pic = null;
+                // }
             }
         } else {
             $user->users_profile_pic = null;
