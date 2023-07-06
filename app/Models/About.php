@@ -13,6 +13,9 @@ class About extends Model
 
     protected $fillable = [
         'about_code',
-        'body'
+        'body',
+        'meta_desc',
+        'meta_title',
+        'meta_keyword',
     ];
 }
