@@ -70,10 +70,12 @@ Route::group(['prefix' => 'v1', 'middleware' => ['auth:sanctum', 'ability:admin'
   Route::apiResource('/payment_method', PaymentMethodController::class);
   Route::post('/payment_method/{pm_code}', [PaymentMethodController::class, 'togglePaymentMethod']);
 
-  // Riwayat Pembelian
-  Route::get('/transaction/riwayat_pembelian', [RiwayatPembelianController::class, 'getAllRiwayatPembelian']);
-  Route::get('/transaction/riwayat_pembelian/total', [RiwayatPembelianController::class, 'getJumlahPendapatan']);
-  Route::get('/transaction/detail_pembelian/{kode}', [RiwayatPembelianController::class, 'getDetailPembelian']);
+  
+    // Riwayat Pembelian
+    Route::get('/transaction/riwayat_pembelian', [RiwayatPembelianController::class, 'getAllRiwayatPembelian']);
+    Route::get('/transaction/riwayat_pembelian/total', [RiwayatPembelianController::class, 'getJumlahPendapatan']);
+    Route::get('/transaction/detail_pembelian/{kode}', [RiwayatPembelianController::class, 'getDetailPembelian']);
+    Route::patch('/transaction/edit_status', [RiwayatPembelianController::class, 'editStatusPembelian']);
 
   // Riwayat Top Up Saldo
   Route::get('/transaction/riwayat_topupsaldo', [RiwayatTopUpController::class, 'getRiwayatTopUpSaldo']);
