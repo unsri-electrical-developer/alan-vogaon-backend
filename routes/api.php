@@ -117,4 +117,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['auth:sanctum', 'ability:admin'
     Route::post('/admin/add', [AdminController::class, 'addAdmin']);
     Route::post('/admin/edit', [AdminController::class, 'editAdmin']);
     Route::delete('/admin/delete/{code}', [AdminController::class, 'deleteAdmin']);
+
+    Route::get('/fa_barcode', [AdminController::class, 'getFABarcode']);
+    Route::post('/fa_barcode/pair', [AdminController::class, 'pairFABarcode']);
 });
