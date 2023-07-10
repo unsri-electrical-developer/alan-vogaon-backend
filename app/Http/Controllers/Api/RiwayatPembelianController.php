@@ -16,6 +16,7 @@ class RiwayatPembelianController extends ApiController
     {
         $select = [
             'transaction.transaction_code',
+            'transaction.no_reference',
             'users.name',
             'transaction.total_amount',
             'transaction.created_at',
@@ -36,7 +37,7 @@ class RiwayatPembelianController extends ApiController
             ->orderBy('transaction.created_at',)->get();
 
         foreach ($riwayat_pembelian as $item) {
-            $item->waktu_transaksi = $item->created_at->format('Y-m-d');
+            $item->waktu_transaksi = $item->created_at->format('d-m-Y H:i:s');
         }
 
         return $this->sendResponse(0, "Sukses", $riwayat_pembelian);
@@ -128,6 +129,23 @@ class RiwayatPembelianController extends ApiController
             
             $data->product_list = $product_list;
 
+            return $this->sendResponse(0, "Sukses", $data);
+        } catch (\Exception $e) {
+            return $this->sendError(2, 'Gagal', $e->getMessage());
+        }
+    }
+
+    public function editStatusPembelian(Request $request) 
+    {
+        try {
+            $kode_transaksi = $request->kode_transaksi;
+            $status = $request->status;
+            $data = Transaction::where('transaction_code', $kode_transaksi)->first();
+            if (!$data) {
+                return $this->sendError(1, "Data tidak ditemukan!", []);
+            }
+            $data->status = $status;
+            $data->update();
             return $this->sendResponse(0, "Sukses", $data);
         } catch (\Exception $e) {
             return $this->sendError(2, 'Gagal', $e->getMessage());
