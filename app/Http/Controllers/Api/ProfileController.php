@@ -73,7 +73,7 @@ class ProfileController extends ApiController
     {
         $admin_id = auth()->user()->id;
 
-        $admin = Admin::find($admin_id, ['name', 'email', 'admin_profile_pic']);
+        $admin = Admin::find($admin_id, ['name', 'email', 'admin_profile_pic', 'fa_set', 'fa_secret']);
 
         if (!empty($admin->admin_profile_pic)) {
             if (!filter_var($admin->admin_profile_pic, FILTER_VALIDATE_URL)) {

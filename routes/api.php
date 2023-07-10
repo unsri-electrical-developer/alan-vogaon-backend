@@ -115,10 +115,15 @@ Route::group(['prefix' => 'v1', 'middleware' => ['auth:sanctum', 'ability:admin'
   Route::post('/promo/edit/status', [PromoController::class, 'updateStatusPromo']);
   Route::delete('/promo/delete/{code}', [PromoController::class, 'deletePromo']);
 
-  // Admin
-  Route::get('/admin', [AdminController::class, 'getAdmin']);
-  Route::get('/admin/{code}', [AdminController::class, 'getDetailAdmin']);
-  Route::post('/admin/add', [AdminController::class, 'addAdmin']);
-  Route::post('/admin/edit', [AdminController::class, 'editAdmin']);
-  Route::delete('/admin/delete/{code}', [AdminController::class, 'deleteAdmin']);
+    // Admin
+    Route::get('/admin', [AdminController::class, 'getAdmin']);
+    Route::get('/admin/{code}', [AdminController::class, 'getDetailAdmin']);
+    Route::post('/admin/add', [AdminController::class, 'addAdmin']);
+    Route::post('/admin/edit', [AdminController::class, 'editAdmin']);
+    Route::delete('/admin/delete/{code}', [AdminController::class, 'deleteAdmin']);
+
+    Route::get('/fa_barcode', [AdminController::class, 'getFABarcode']);
+    Route::post('/fa_barcode/pair', [AdminController::class, 'pairFABarcode']);
+
+    Route::post('/maintenance', [AdminController::class, 'setMaintenanceMode']);
 });

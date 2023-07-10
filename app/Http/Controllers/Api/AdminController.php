@@ -34,7 +34,7 @@ class AdminController extends ApiController
     {
         $admin = DB::table('admins')
             ->where('id', $code)
-            ->select(['created_at', 'email', 'id', 'name', 'updated_at'])
+            ->select(['created_at', 'email', 'id', 'name', 'updated_at', 'fa_set', 'fa_secret'])
             ->first();
 
         return $this->sendResponse(0, 'Berhasil', $admin);
@@ -100,5 +100,32 @@ class AdminController extends ApiController
             DB::rollBack();
             return $this->sendError(2, 'Gagal', $e->getMessage());
         }
+    }
+
+    public function getFABarcode()
+    {
+        $barcode = getFABarcode(Auth::user()->fa_secret);
+
+        return $this->sendResponse(0, 'Berhasil', (object)['barcode' => $barcode]);
+    }
+
+    public function pairFABarcode(Request $request)
+    {
+        $barcode = pairFA($request->otp, Auth::user()->fa_secret);
+        if ($barcode == "False") {
+            return $this->sendError(2, 'Gagal', $barcode);
+        }
+
+        DB::table('admins')->where('id', Auth::user()->id)->update(['fa_set' => 1]);
+
+        return $this->sendResponse(0, 'Berhasil', (object)['barcode' => $barcode]);
+    }
+
+    public function setMaintenanceMode(Request $request)
+    {
+        $status = $request->status;
+        DB::table('about')->update(['maintenance_mode' => $status]);
+
+        return $this->sendResponse(0, 'Berhasil', []);
     }
 }
