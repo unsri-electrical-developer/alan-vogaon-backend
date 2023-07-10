@@ -73,23 +73,24 @@ class ProfileController extends ApiController
     {
         $admin_id = auth()->user()->id;
 
-        $admin = Admin::find($admin_id, ['name', 'email', 'admin_profile_pic']);
+        $admin = Admin::find($admin_id, ['name', 'email', 'admin_profile_pic', 'fa_set', 'fa_secret', 'role']);
 
         if (!empty($admin->admin_profile_pic)) {
             if (!filter_var($admin->admin_profile_pic, FILTER_VALIDATE_URL)) {
-                $file_path = storage_path('app/public' . $admin->admin_profile_pic);
-                if (file_exists($file_path)) {
-                    $file_url = asset('storage' . $admin->admin_profile_pic);
+                // $file_path = storage_path('app/public' . $admin->admin_profile_pic);
+                // if (file_exists($file_path)) {
+                    // $file_url = asset('storage' . $admin->admin_profile_pic);
+                    $file_url = env('ADMIN_DOMAIN') . $admin->admin_profile_pic;
                     $admin->admin_profile_pic = $file_url;
-                } else {
-                    $admin->admin_profile_pic = null;
+                // } else {
+                //     $admin->admin_profile_pic = null;
                     
-                }
+                // }
             }
         } else {
             $admin->admin_profile_pic = null;
         }
-        $admin['users_type'] = 'SA';
+        $admin['users_type'] = $admin->role;
 
         return $this->sendResponse(0, "Sukses", $admin);
 

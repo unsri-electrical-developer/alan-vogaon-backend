@@ -13,8 +13,13 @@ class AuthController extends ApiController
 {
     public function login(Request $request)
     {
+        $check = checkCaptcha($request->token);
+        if (!$check->success) {
+            return $this->sendError(2, "Captcha Tidak Valid !", $check);
+        }
+
         if (!auth('admin')->attempt($request->only('email', 'password'))) {
-            return $this->sendError(1, "Login gagal! Silahkan cek kembali email dan password", []);
+            return $this->sendError(2, "Login gagal! Silahkan cek kembali email dan password", []);
         }
 
         $user = Admin::where('email', $request['email'])->firstOrFail();
@@ -22,7 +27,7 @@ class AuthController extends ApiController
         $token = $user->createToken(auth('admin')->user()->email, ['admin'])->plainTextToken;
         $data = auth('admin')->user();
         $data->access_token = $token;
-        $data['users_type'] = 'SA';
+        $data['users_type'] = $data->role;
 
         return $this->sendResponse(0, "Login berhasil", $data);
     }
@@ -46,7 +51,7 @@ class AuthController extends ApiController
         } else {
             $logged = Auth::user($request->header('Authorization'));
             $logged['access_token'] = $request->bearerToken();
-            $logged['users_type'] = 'SA';
+            $logged['users_type'] = $logged->role;
 
             if ($header) {
                 return  $this->sendResponse(0, 'Valid Token', $logged);

@@ -36,17 +36,18 @@ class PaymentMethodController extends ApiController
         ->when($request->has('static'), function ($query) use ($request) {
             $query->where('status', 1);
         })
-        ->get(['pm_title', 'pm_code', 'pm_logo', 'from', 'status', 'created_at']);
+        ->get(['pm_title', 'pm_code', 'pm_logo', 'from', 'status', 'min_order', 'fee', 'created_at']);
 
         foreach ($payment_methods as $item) {
             if (!filter_var($item->pm_logo, FILTER_VALIDATE_URL)) {
-                $file_path = storage_path('app/public' . $item->pm_logo);
-                if (file_exists($file_path)) {
-                    $file_url = asset('storage' . $item->pm_logo);
+                // $file_path = storage_path('app/public' . $item->pm_logo);
+                // if (file_exists($file_path)) {
+                    // $file_url = asset('storage' . $item->pm_logo);
+                    $file_url = env('ADMIN_DOMAIN') .  $item->pm_logo;
                     $item->pm_logo = $file_url;
-                } else {
-                    $item->pm_logo = null;
-                }
+                // } else {
+                //     $item->pm_logo = null;
+                // }
             }
             if ($request->has('static')) {
                 $item->status = 0;
@@ -68,7 +69,9 @@ class PaymentMethodController extends ApiController
             'pm_title' => 'required',
             'pm_code' => 'required|unique:payment_method,pm_code',
             'pm_logo' => 'required',
-            'from' => 'required'
+            'from' => 'required',
+            'min_order' => 'required',
+            'fee' => 'required',
         ]);
         
         if ($validator->fails()) {
@@ -113,7 +116,8 @@ class PaymentMethodController extends ApiController
         }
 
         if (!filter_var($payment_method->pm_logo, FILTER_VALIDATE_URL)) {
-            $file_url = asset('storage' . $payment_method->pm_logo);
+            // $file_url = asset('storage' . $payment_method->pm_logo);
+            $file_url = env('ADMIN_DOMAIN') . $payment_method->pm_logo;
             $payment_method->pm_logo = $file_url;
         }
 
@@ -133,6 +137,8 @@ class PaymentMethodController extends ApiController
             'pm_title' => 'required',
             'pm_logo' => 'required',
             'pm_code' => 'required',
+            'min_order' => 'required',
+            'fee' => 'required',
             'from' => 'required',
         ]);
         
@@ -167,7 +173,7 @@ class PaymentMethodController extends ApiController
         $result = $payment_method->update($validated);
 
         if ($result) {
-            return $this->sendResponse(0, "Berhasil mengubah data!", []);
+            return $this->sendResponse(0, "Berhasil mengubah data!", $validated);
         } else {
             return $this->sendError(1, "Gagal mengubah data!", []);
         }
@@ -204,7 +210,7 @@ class PaymentMethodController extends ApiController
     public function togglePaymentMethod(Request $request, $pm_code)
     {
         $validator = $this->validateThis($request, [
-            'isActive' => 'required'
+            'status' => 'required'
         ]);
         
         if ($validator->fails()) {
@@ -216,19 +222,19 @@ class PaymentMethodController extends ApiController
             return $this->sendError(1, "Data tidak ditemukan!", []);
         }
 
-        $result = $payment_method->update(['status' => $request->isActive]);
+        $result = $payment_method->update(['status' => $request->status]);
         if ($result) {
             $data = [
                 'pm_code' => $pm_code,
-                'status' => $request->isActive
+                'status' => $request->status
             ];
-            return $this->sendResponse(0, "Berhasil mengubah isActive!", $data);
+            return $this->sendResponse(0, "Berhasil mengubah status!", $data);
         } else {
             $data = [
                 'pm_code' => $pm_code,
-                'status' => $payment_method->isActive
+                'status' => $payment_method->status
             ];
-            return $this->sendError(1, "Gagal mengubah isActive!", $data);
+            return $this->sendError(1, "Gagal mengubah status!", $data);
         }
     }
 }

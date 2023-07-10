@@ -12,7 +12,7 @@ class Admin extends Authenticatable
 {
     // use Notifiable;
     use HasApiTokens, HasFactory, Notifiable;
-    
+
     /**
      * The attributes that are mass assignable.
      *

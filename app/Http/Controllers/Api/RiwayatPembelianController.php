@@ -19,7 +19,8 @@ class RiwayatPembelianController extends ApiController
             'users.name',
             'transaction.total_amount',
             'transaction.created_at',
-            'transaction.status'
+            'transaction.status',
+            'transaction.type',
         ];
 
         $riwayat_pembelian = Transaction::select($select)
@@ -31,6 +32,7 @@ class RiwayatPembelianController extends ApiController
             ->when($request->has('search'), function ($query) use ($request) {
                 $query->where('users.name', 'like', '%' . $request->search . '%');
             })
+            ->whereIn('transaction.type', ['order_voucher', 'order_item'])
             ->orderBy('transaction.created_at',)->get();
 
         foreach ($riwayat_pembelian as $item) {
@@ -42,7 +44,9 @@ class RiwayatPembelianController extends ApiController
 
     public function getJumlahPendapatan(Request $request)
     {
-        $total = Transaction::where('status', 'done')->sum('total_amount');
+        $total = Transaction::where('status', 'success')
+            ->whereIn('transaction.type', ['order_voucher', 'order_item'])
+            ->sum('total_amount');
 
         $dateFrom = Carbon::now()->subDays(30);
         $dateTo = Carbon::now();
@@ -129,4 +133,5 @@ class RiwayatPembelianController extends ApiController
             return $this->sendError(2, 'Gagal', $e->getMessage());
         }
     }
+    
 }

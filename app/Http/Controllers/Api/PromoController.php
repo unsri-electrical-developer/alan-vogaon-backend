@@ -19,7 +19,7 @@ class PromoController extends ApiController
     public function getDetailPromo($code)
     {
         $data = DB::table('vouchers')->where('vouchers_code', $code)->first();
-        $pm = DB::table('payment_method')->where('status', 1)->get();
+        $pm = DB::table('payment_method')->where('isActive', 1)->get();
         foreach ($pm as $key => $value) {
             $value->status = 0;
             if (str_contains($data->payment_method, $value->pm_code)) {
@@ -42,10 +42,11 @@ class PromoController extends ApiController
             'voucher_discount' => $request->discount,
             'voucher_discount_max' => $request->discount_max,
             'con_payment_method' => $request->con_payment_method,
-            'voucher_start' => $request->start,
-            'voucher_end' => $request->end,
+            'voucher_start' => date('Y-m-d', strtotime($request->start)),
+            'voucher_end' => date('Y-m-d', strtotime($request->end)),
             'isActive' => 1
         ];
+        
         if ($request->con_payment_method) {
             $pm = $request->payment_method;
             foreach ($pm as $key => $value) {

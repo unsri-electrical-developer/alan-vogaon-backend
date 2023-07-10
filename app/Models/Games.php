@@ -15,7 +15,10 @@ class Games extends Model
         'title',
         'img',
         'code',
-        'category_code'
+        'category_code',
+        'game_description',
+        'field_description',
+        'field_img'
     ];
 
     // N to 1 (games -> category)
@@ -35,6 +38,7 @@ class Games extends Model
     {
         return $this->hasMany(Fields::class, 'game_code', 'code');
     }
+
      public function redeem()
     {
         return $this->hasMany(GamesVoucher::class, 'game_code', 'code');
