@@ -22,6 +22,19 @@ class GamesVoucherController extends ApiController
         return $validate->values()->all();
     }
     
+     /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index(Request $request)
+    {
+        $games_items = GamesVoucher::latest()->get();
+
+        return $this->sendResponse(0, "Sukses", $games_items);
+    }
+
+
    
     /**
      * Store a newly created resource in storage.
