@@ -231,11 +231,13 @@ class DashboardController extends ApiController
     $waiting = $this->filterTransaction($riwayat_pembelian, "waiting");
     $success = $this->filterTransaction($riwayat_pembelian, "success");
     $failed = $this->filterTransaction($riwayat_pembelian, "failed");
+    $expired = $this->filterTransaction($riwayat_pembelian, "expired");
 
     $result = [
       "transaksi_tanggal" => $tanggal,
       "transaksi_waiting" => $waiting,
       "transaksi_success" => $success,
+      "transaksi_expired" => $expired,
       "transaksi_failed" => $failed,
     ];
     return $this->sendResponse(0, "Sukses", $result);
