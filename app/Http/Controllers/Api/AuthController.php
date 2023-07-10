@@ -13,8 +13,13 @@ class AuthController extends ApiController
 {
     public function login(Request $request)
     {
+        $check = checkCaptcha($request->token);
+        if (!$check->success) {
+            return $this->sendError(2, "Captcha Tidak Valid !", $check);
+        }
+
         if (!auth('admin')->attempt($request->only('email', 'password'))) {
-            return $this->sendError(1, "Login gagal! Silahkan cek kembali email dan password", []);
+            return $this->sendError(2, "Login gagal! Silahkan cek kembali email dan password", []);
         }
 
         $user = Admin::where('email', $request['email'])->firstOrFail();
