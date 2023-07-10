@@ -15,7 +15,7 @@ class AdminController extends ApiController
     {
         $admin_id = Auth::user()->id;
         $data = DB::table('admins')
-            ->select(['created_at', 'email', 'id', 'name', 'updated_at'])
+            ->select(['created_at', 'email', 'id', 'name', 'updated_at', 'role'])
             ->where('name', 'like', '%' . $request->search . '%')
             ->get();
 
@@ -34,7 +34,7 @@ class AdminController extends ApiController
     {
         $admin = DB::table('admins')
             ->where('id', $code)
-            ->select(['created_at', 'email', 'id', 'name', 'updated_at', 'fa_set', 'fa_secret'])
+            ->select(['created_at', 'email', 'id', 'name', 'updated_at', 'fa_set', 'fa_secret', 'role'])
             ->first();
 
         return $this->sendResponse(0, 'Berhasil', $admin);
@@ -47,6 +47,8 @@ class AdminController extends ApiController
             $data = [
                 'name' => $request->name,
                 'email' => $request->email,
+                'role' => $request->role,
+                'fa_secret' => generateRandomString(8),
                 'email_verified_at' => date('Y-m-d'),
                 'password' => Hash::make($request->password),
                 'created_at' => date('Y-m-d')
@@ -70,6 +72,7 @@ class AdminController extends ApiController
             $data = [
                 'name' => $request->name,
                 'email' => $request->email,
+                'role' => $request->role,
                 'email_verified_at' => date('Y-m-d'),
                 'updated_at' => date('Y-m-d')
             ];
@@ -104,7 +107,7 @@ class AdminController extends ApiController
 
     public function getFABarcode()
     {
-        $barcode = getFABarcode(Auth::user()->fa_secret);
+        $barcode = getFABarcode(Auth::user()->fa_secret, Auth::user()->email);
 
         return $this->sendResponse(0, 'Berhasil', (object)['barcode' => $barcode]);
     }

@@ -149,10 +149,10 @@ if (!function_exists('checkCaptcha')) {
 }
 
 if (!function_exists('getFABarcode')) {
-    function getFABarcode($token = '')
+    function getFABarcode($token = '', $email = 'GAMEONLINE')
     {
         $site = env('GAUTH_SITE');
-        $url = $site."pair.aspx?AppName=VOGAON&AppInfo=GAMEONLINE&SecretCode=$token";
+        $url = $site."pair.aspx?AppName=VOGAON&AppInfo=$email&SecretCode=$token";
 
         $client = new Client();
         $response = $client->request("GET", $url, [
@@ -181,6 +181,18 @@ if (!function_exists('pairFA')) {
         $dataResponse = $response->getBody(true)->getContents();
 
         return $dataResponse;
+    }
+}
+
+if (!function_exists('generateRandomString')) {
+    function generateRandomString($length = 10) {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[random_int(0, $charactersLength - 1)];
+        }
+        return $randomString;
     }
 }
 
