@@ -98,6 +98,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['auth:sanctum', 'ability:admin'
     Route::get('/dashboard/statistik_pendapatan', [DashboardController::class, 'getStatistikPendapatan']);
     Route::get('/dashboard/statistik_pendaftaran', [DashboardController::class, 'getStatistikPendaftaran']);
     Route::get('/dashboard/statistik_penjualan_game', [DashboardController::class, 'getStatistikPenjualanGame']);
+  Route::get('/dashboard/dataorder', [DashboardController::class, 'getListOrder']);
 
     // Profile
     Route::patch('/profile/edit_profile', [ProfileController::class, 'editProfile']);

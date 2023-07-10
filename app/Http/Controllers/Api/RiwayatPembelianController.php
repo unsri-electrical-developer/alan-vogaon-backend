@@ -133,4 +133,5 @@ class RiwayatPembelianController extends ApiController
             return $this->sendError(2, 'Gagal', $e->getMessage());
         }
     }
+    
 }
