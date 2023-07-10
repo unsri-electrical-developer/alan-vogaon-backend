@@ -121,4 +121,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['auth:sanctum', 'ability:admin'
 
     Route::get('/fa_barcode', [AdminController::class, 'getFABarcode']);
     Route::post('/fa_barcode/pair', [AdminController::class, 'pairFABarcode']);
+
+    Route::post('/maintenance', [AdminController::class, 'setMaintenanceMode']);
 });

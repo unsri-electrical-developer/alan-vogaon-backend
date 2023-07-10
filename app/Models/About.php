@@ -17,5 +17,6 @@ class About extends Model
         'meta_desc',
         'meta_title',
         'meta_keyword',
+        'maintenance_mode',
     ];
 }

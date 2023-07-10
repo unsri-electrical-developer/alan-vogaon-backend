@@ -15,7 +15,7 @@ class GeneralInfoController extends ApiController
 
     public function getGeneralInfo()
     {
-        $about = About::first(['body', 'meta_title', 'meta_desc', 'meta_keyword']);
+        $about = About::first(['body', 'meta_title', 'meta_desc', 'meta_keyword', 'maintenance_mode']);
 
         $contact = Contact::all(['contact_code', 'contact_name', 'contact_url']);
         // $contact_arr = [];

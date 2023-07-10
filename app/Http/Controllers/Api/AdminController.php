@@ -120,4 +120,12 @@ class AdminController extends ApiController
 
         return $this->sendResponse(0, 'Berhasil', (object)['barcode' => $barcode]);
     }
+
+    public function setMaintenanceMode(Request $request)
+    {
+        $status = $request->status;
+        DB::table('about')->update(['maintenance_mode' => $status]);
+
+        return $this->sendResponse(0, 'Berhasil', []);
+    }
 }
