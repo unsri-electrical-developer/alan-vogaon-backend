@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Storage;
 use Google\Cloud\Storage\StorageClient;
+use GuzzleHttp\Client;
 
 if (!function_exists('generateFiledCode')) {
     function generateFiledCode($code)
@@ -126,6 +127,72 @@ if (!function_exists('getImage')) {
             return asset('/images/default.png');
         }
         return env('ADMIN_DOMAIN') . $file;
+    }
+}
+
+if (!function_exists('checkCaptcha')) {
+    function checkCaptcha($token = '')
+    {
+        $secret = env('CAPTCHA_SECRET_KEY');
+        $url = "https://www.google.com/recaptcha/api/siteverify?secret=$secret&response=$token";
+
+        $client = new Client();
+        $response = $client->request("POST", $url, [
+            "headers" => [
+                "Content-type" => "application/json",
+            ],
+        ]);
+        $dataResponse = json_decode($response->getBody()->getContents(), true);
+
+        return (object)$dataResponse;
+    }
+}
+
+if (!function_exists('getFABarcode')) {
+    function getFABarcode($token = '', $email = 'GAMEONLINE')
+    {
+        $site = env('GAUTH_SITE');
+        $url = $site."pair.aspx?AppName=VOGAON&AppInfo=$email&SecretCode=$token";
+
+        $client = new Client();
+        $response = $client->request("GET", $url, [
+            // "headers" => [
+            //     "Content-type" => "text/html; charset=utf-8",
+            // ],
+        ]);
+        $dataResponse = $response->getBody(true)->getContents();
+
+        return $dataResponse;
+    }
+}
+
+if (!function_exists('pairFA')) {
+    function pairFA($pin = '', $token = '')
+    {
+        $site = env('GAUTH_SITE');
+        $url = $site."Validate.aspx?Pin=$pin&SecretCode=$token";
+
+        $client = new Client();
+        $response = $client->request("GET", $url, [
+            // "headers" => [
+            //     "Content-type" => "text/html; charset=utf-8",
+            // ],
+        ]);
+        $dataResponse = $response->getBody(true)->getContents();
+
+        return $dataResponse;
+    }
+}
+
+if (!function_exists('generateRandomString')) {
+    function generateRandomString($length = 10) {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[random_int(0, $charactersLength - 1)];
+        }
+        return $randomString;
     }
 }
 
