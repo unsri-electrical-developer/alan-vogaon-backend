@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use Carbon\Carbon;
+use App\Models\User;
 use App\Models\Transaction;
+use App\Models\UsersBalance;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ApiController;
-
-
 
 class RiwayatTopUpController extends ApiController
 {
@@ -218,5 +218,136 @@ class RiwayatTopUpController extends ApiController
             return $this->sendError(2, 'Gagal', $e->getMessage());
         }
         
+    }
+
+    // public function getDetailTopUpSaldo(Request $request, $kode)
+    // {
+    //     // $kode_transaksi = $id;
+    //     // $data = [];
+    //     // foreach ($this->data_riwayat as $key => $value) {
+    //     //     if ($value['no_transaksi'] == $kode_transaksi) {
+    //     //         $data = $value;
+    //     //         break;
+    //     //     }
+    //     // }
+
+    //     // return $this->sendResponse(0, "Sukses", $data);
+    //     try {
+    //         $kode_transaksi = $kode;
+    //         $select = [
+    //             'transaction.transaction_code',
+    //             'transaction.no_reference',
+    //             'transaction.created_at',
+    //             'transaction.status',
+    //             'transaction.total_amount',
+    //             'users.name',
+    //             'users.email',
+    //             'payment_method.pm_title as payment_method',
+
+    //         ];
+    //         $data = Transaction::select($select)
+    //         ->join('users', 'transaction.users_code', '=', 'users.users_code')
+    //         ->join('payment_method', 'payment_method.pm_code', '=', 'transaction.payment_method')
+    //         ->where('transaction.transaction_code', $kode_transaksi)
+    //         ->first();
+
+    //         if (!$data) {
+    //             return $this->sendError(1, "Data tidak ditemukan!", []);
+    //         }
+            
+    //         $data->tanggal = $data->created_at->format('d/m/Y');
+            
+
+    //         return $this->sendResponse(0, "Sukses", $data);
+    //     } catch (\Exception $e) {
+    //         return $this->sendError(2, 'Gagal', $e->getMessage());
+    //     }
+        
+    // }
+
+    public function getUsersTopup(Request $request)
+    {
+        $select = [
+            'users.users_code',
+            'users.name',
+            'users.email',
+            'users_balance.users_balance',
+        ];
+
+        $users_topup = User::select($select)
+            ->join('users_balance', 'users.users_code', '=', 'users_balance.users_code')
+            ->get();
+
+        return $this->sendResponse(0, "Sukses", $users_topup);
+    }
+
+    public function getDetailUserTopup(Request $request, $user_code)
+    {
+        $select = [
+            // 'users.users_code',
+            // 'users.name',
+            // 'users.email',
+            // 'users_balance.users_balance',
+            'transaction.transaction_code',
+            'transaction.total_amount',
+            'transaction.created_at',
+            'transaction.status',
+        ];
+
+        $data_user = User::select(['users.users_code', 'users.name', 'users.email', 'users_balance.users_balance'])
+            ->join('users_balance', 'users.users_code', '=', 'users_balance.users_code')
+            ->where('users.users_code', $user_code)
+            ->first();
+
+        $data_topup = User::select($select)
+            ->join('transaction', 'users.users_code', '=', 'transaction.users_code')
+            ->where('users.users_code', $user_code)
+            ->where('type', 'topup')
+            ->get();
+
+        $data = [
+            'data_user' => $data_user,
+            'data_topup' => $data_topup,
+        ];
+        return $this->sendResponse(0, "Sukses", $data);
+    }
+
+    public function updateUserSaldo(Request $request)
+    {
+        $users_code = $request->users_code;
+        $action = $request->action;
+        $nominal = $request->nominal;
+
+        $user = User::where('users_code', $users_code)->first();
+        if (!$user) {
+            return $this->sendError(1, "User tidak ditemukan!", []);
+        }
+        
+        $users_balance = UsersBalance::where('users_code', $users_code)->first();
+        if (!$users_balance) {
+            return $this->sendError(1, "User Balance tidak ditemukan!", []);
+        }
+
+        $old_balance = $users_balance->users_balance;
+
+        if ($action == 'TAMBAH') {
+            $users_balance->users_balance = $users_balance->users_balance + $nominal;
+        } else if ($action == 'KURANG'){
+            $users_balance->users_balance = $users_balance->users_balance - $nominal;
+        } else {
+            return $this->sendError(1, "Action tidak ditemukan!", []);
+        }
+
+        $users_balance->update();
+
+        $data = [
+            'users_code' => $users_code,
+            'name' => $user['name'],
+            'old_balance' => $old_balance,
+            'new_balance' => $users_balance->users_balance,
+        ];
+        
+        return $this->sendResponse(0, "Sukses", $data);
+
     }
 }
