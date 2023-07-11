@@ -21,10 +21,14 @@ class UserController extends ApiController
   {
     $users = User::latest()
       ->when($request->has('search'), function ($query) use ($request) {
-        $query->where('name', 'like', '%' . $request->search . '%')
-          ->orWhere('email', 'like', '%' . $request->search . '%')
-          ->orWhere('no_telp', 'like', '%' . $request->search . '%');
+        $query->where('is_delete', 0);
+        $query->where(function ($q) use ($request) {
+          $q->where('name', 'like', '%' . $request->search . '%')
+            ->orWhere('email', 'like', '%' . $request->search . '%')
+            ->orWhere('no_telp', 'like', '%' . $request->search . '%');
+        });
       })
+      ->where('is_delete', 0)
       ->get(['name', 'users_code', 'email', 'no_telp', 'users_profile_pic', 'isSuspend', 'created_at', 'memberType', 'isActive', 'isSetPin']);
 
     // Cek img url atau file
@@ -139,6 +143,55 @@ class UserController extends ApiController
       }
 
       DB::table('users')->where('users_code', $users_code)->update(['isSuspend' => 0]);
+
+      return $this->sendResponse(0, "Berhasil", []);
+    } catch (\Exception $e) {
+      return $this->sendError(4, "gagal", ['msg' => $e->getMessage()]);
+    }
+  }
+
+  public function changeUserStatus(Request $request)
+  {
+    try {
+      $users_code = $request->users_code;
+      DB::table('users')->where('users_code', $users_code)->update(['isActive' => $request->status]);
+
+      return $this->sendResponse(0, "Berhasil", []);
+    } catch (\Exception $e) {
+      return $this->sendError(4, "gagal", ['msg' => $e->getMessage()]);
+    }
+  }
+
+  public function changeUserPassword(Request $request)
+  {
+    try {
+      $password = Hash::make($request->password);
+      $users_code = $request->users_code;
+      DB::table('users')->where('users_code', $users_code)->update(['password' => $password]);
+
+      return $this->sendResponse(0, "Berhasil", []);
+    } catch (\Exception $e) {
+      return $this->sendError(4, "gagal", ['msg' => $e->getMessage()]);
+    }
+  }
+
+  public function changeUserLevel(Request $request)
+  {
+    try {
+      $memberType = $request->memberType;
+      $users_code = $request->users_code;
+      DB::table('users')->where('users_code', $users_code)->update(['memberType' => $memberType]);
+
+      return $this->sendResponse(0, "Berhasil", []);
+    } catch (\Exception $e) {
+      return $this->sendError(4, "gagal", ['msg' => $e->getMessage()]);
+    }
+  }
+
+  public function deleteUser($users_code)
+  {
+    try {
+      DB::table('users')->where('users_code', $users_code)->update(['is_delete' => 1]);
 
       return $this->sendResponse(0, "Berhasil", []);
     } catch (\Exception $e) {

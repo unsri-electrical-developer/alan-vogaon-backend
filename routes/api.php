@@ -44,6 +44,10 @@ Route::group(['prefix' => 'v1', 'middleware' => ['auth:sanctum', 'ability:admin'
   Route::apiResource('/users', UserController::class);
 
   Route::post('/users/pin/change', [UserController::class, 'changeUserPin']);
+  Route::post('/users/status/change', [UserController::class, 'changeUserStatus']);
+  Route::post('/users/password/change', [UserController::class, 'changeUserPassword']);
+  Route::post('/users/level/change', [UserController::class, 'changeUserLevel']);
+  Route::delete('/users/delete/{users_code}', [UserController::class, 'deleteUser']);
   
 
   // Category
