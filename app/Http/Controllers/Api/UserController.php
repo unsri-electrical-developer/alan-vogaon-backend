@@ -25,7 +25,7 @@ class UserController extends ApiController
           ->orWhere('email', 'like', '%' . $request->search . '%')
           ->orWhere('no_telp', 'like', '%' . $request->search . '%');
       })
-      ->get(['name', 'users_code', 'email', 'no_telp', 'users_profile_pic', 'isSuspend', 'created_at']);
+      ->get(['name', 'users_code', 'email', 'no_telp', 'users_profile_pic', 'isSuspend', 'created_at', 'memberType', 'isActive', 'isSetPin']);
 
     // Cek img url atau file
 
