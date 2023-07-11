@@ -89,9 +89,8 @@ class GamesVoucherController extends ApiController
      */
     public function show( $id)
     {
-        $gamesVouchers = GamesVoucher::where('game_code', $id)
-                ->get()
-                ->groupBy('item_code');
+        $gamesVouchers = GamesVoucher::where('code', $id)
+                ->first();
 
         
         if (!$gamesVouchers ) {
