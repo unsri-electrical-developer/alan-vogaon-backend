@@ -30,7 +30,7 @@ class UserController extends ApiController
       })
       ->where('is_delete', 0)
       ->leftjoin('users_balance', 'users.users_code', '=', 'users_balance.users_code')
-      ->get(['users.name', 'users.email', 'users.no_telp', 'users.users_profile_pic', 'users.isSuspend', 'users.created_at', 'users.memberType', 'users.isActive', 'users.isSetPin', 'users_balance.users_balance']);
+      ->get(['users.users_code', 'users.name', 'users.email', 'users.no_telp', 'users.users_profile_pic', 'users.isSuspend', 'users.created_at', 'users.memberType', 'users.isActive', 'users.isSetPin', 'users_balance.users_balance']);
 
     // Cek img url atau file
 
