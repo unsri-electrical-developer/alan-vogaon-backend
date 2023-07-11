@@ -68,6 +68,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['auth:sanctum', 'ability:admin'
 
   // Payment Method
   Route::apiResource('/payment_method', PaymentMethodController::class);
+  Route::post('/payment_method/change/reorder', [PaymentMethodController::class, 'reorderPaymentMethod']);
   Route::post('/payment_method/{pm_code}', [PaymentMethodController::class, 'togglePaymentMethod']);
 
   

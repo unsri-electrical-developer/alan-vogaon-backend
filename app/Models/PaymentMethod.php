@@ -18,6 +18,7 @@ class PaymentMethod extends Model
         'from',
         'status',
         'min_order',
-        'fee'
+        'fee',
+        'position'
     ];
 }
