@@ -81,6 +81,9 @@ Route::group(['prefix' => 'v1', 'middleware' => ['auth:sanctum', 'ability:admin'
   Route::get('/transaction/riwayat_topupsaldo', [RiwayatTopUpController::class, 'getRiwayatTopUpSaldo']);
   Route::get('/transaction/total_topupsaldo', [RiwayatTopUpController::class, 'getTotalTopUpSaldo']);
   Route::get('/transaction/detail_topupsaldo/{kode}', [RiwayatTopUpController::class, 'getDetailTopUpSaldo']);
+  Route::get('/transaction/users_topup', [RiwayatTopUpController::class, 'getUsersTopup']);
+  Route::get('/transaction/detail_user_topup/{user_code}', [RiwayatTopUpController::class, 'getDetailUserTopup']);
+  Route::patch('/transaction/ganti_saldo', [RiwayatTopUpController::class, 'updateUserSaldo']);
 
   // General Info
   Route::get('/general_info', [GeneralInfoController::class, 'getGeneralInfo']);

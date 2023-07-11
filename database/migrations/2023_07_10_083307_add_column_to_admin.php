@@ -13,7 +13,7 @@ class AddColumnToAdmin extends Migration
      */
     public function up()
     {
-        Schema::table('admin', function (Blueprint $table) {
+        Schema::table('admins', function (Blueprint $table) {
             $table->string('role')->default("OP");
         });
     }
@@ -25,7 +25,7 @@ class AddColumnToAdmin extends Migration
      */
     public function down()
     {
-        Schema::table('admin', function (Blueprint $table) {
+        Schema::table('admins', function (Blueprint $table) {
             $table->dropColumn('role');
         });
     }
