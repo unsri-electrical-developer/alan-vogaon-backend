@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\VoucherResend;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\DashboardController;
@@ -44,7 +45,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['auth:sanctum', 'ability:admin'
   Route::apiResource('/users', UserController::class);
 
   Route::post('/users/pin/change', [UserController::class, 'changeUserPin']);
-  
+
 
   // Category
   Route::apiResource('/category', CategoryController::class);
@@ -71,12 +72,12 @@ Route::group(['prefix' => 'v1', 'middleware' => ['auth:sanctum', 'ability:admin'
   Route::post('/payment_method/change/reorder', [PaymentMethodController::class, 'reorderPaymentMethod']);
   Route::post('/payment_method/{pm_code}', [PaymentMethodController::class, 'togglePaymentMethod']);
 
-  
-    // Riwayat Pembelian
-    Route::get('/transaction/riwayat_pembelian', [RiwayatPembelianController::class, 'getAllRiwayatPembelian']);
-    Route::get('/transaction/riwayat_pembelian/total', [RiwayatPembelianController::class, 'getJumlahPendapatan']);
-    Route::get('/transaction/detail_pembelian/{kode}', [RiwayatPembelianController::class, 'getDetailPembelian']);
-    Route::patch('/transaction/edit_status', [RiwayatPembelianController::class, 'editStatusPembelian']);
+
+  // Riwayat Pembelian
+  Route::get('/transaction/riwayat_pembelian', [RiwayatPembelianController::class, 'getAllRiwayatPembelian']);
+  Route::get('/transaction/riwayat_pembelian/total', [RiwayatPembelianController::class, 'getJumlahPendapatan']);
+  Route::get('/transaction/detail_pembelian/{kode}', [RiwayatPembelianController::class, 'getDetailPembelian']);
+  Route::patch('/transaction/edit_status', [RiwayatPembelianController::class, 'editStatusPembelian']);
 
   // Riwayat Top Up Saldo
   Route::get('/transaction/riwayat_topupsaldo', [RiwayatTopUpController::class, 'getRiwayatTopUpSaldo']);
@@ -118,15 +119,16 @@ Route::group(['prefix' => 'v1', 'middleware' => ['auth:sanctum', 'ability:admin'
   Route::post('/promo/edit/status', [PromoController::class, 'updateStatusPromo']);
   Route::delete('/promo/delete/{code}', [PromoController::class, 'deletePromo']);
 
-    // Admin
-    Route::get('/admin', [AdminController::class, 'getAdmin']);
-    Route::get('/admin/{code}', [AdminController::class, 'getDetailAdmin']);
-    Route::post('/admin/add', [AdminController::class, 'addAdmin']);
-    Route::post('/admin/edit', [AdminController::class, 'editAdmin']);
-    Route::delete('/admin/delete/{code}', [AdminController::class, 'deleteAdmin']);
+  // Admin
+  Route::get('/admin', [AdminController::class, 'getAdmin']);
+  Route::get('/admin/{code}', [AdminController::class, 'getDetailAdmin']);
+  Route::post('/admin/add', [AdminController::class, 'addAdmin']);
+  Route::post('/admin/edit', [AdminController::class, 'editAdmin']);
+  Route::delete('/admin/delete/{code}', [AdminController::class, 'deleteAdmin']);
 
-    Route::get('/fa_barcode', [AdminController::class, 'getFABarcode']);
-    Route::post('/fa_barcode/pair', [AdminController::class, 'pairFABarcode']);
+  Route::get('/fa_barcode', [AdminController::class, 'getFABarcode']);
+  Route::post('/fa_barcode/pair', [AdminController::class, 'pairFABarcode']);
 
-    Route::post('/maintenance', [AdminController::class, 'setMaintenanceMode']);
+  Route::post('/maintenance', [AdminController::class, 'setMaintenanceMode']);
+  Route::post('/voucher/resend_email', [VoucherResend::class, 'resendByEmail']);
 });
