@@ -56,12 +56,15 @@ Route::group(['prefix' => 'v1', 'middleware' => ['auth:sanctum', 'ability:admin'
   // GamesVoucher
   Route::apiResource('/game_voucher', GamesVoucherController::class);
   Route::post('/game_voucher/{game_code}', [GamesVoucherController::class, 'store']);
+  Route::get('/game_voucher/voucher/list', [GamesVoucherController::class, 'listProductVoucher']);
 
   // Sliders
   Route::apiResource('/sliders', SlidersController::class);
 
   // Games Item / Products
   Route::apiResource('/games_item/{game_code}/products', GamesItemController::class);
+
+ 
 
   // Payment Gateway
   Route::apiResource('/payment_gateway', PaymentGatewayController::class);
