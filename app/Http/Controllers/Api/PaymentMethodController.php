@@ -29,22 +29,22 @@ class PaymentMethodController extends ApiController
      */
     public function index(Request $request)
     {
-        $payment_methods = PaymentMethod::latest()
-        ->when($request->has('search'), function ($query) use ($request) {
-            $query->where('pm_title', 'like', '%' . $request->search . '%');
-        })
-        ->when($request->has('static'), function ($query) use ($request) {
-            $query->where('status', 1);
-        })
-        ->get(['pm_title', 'pm_code', 'pm_logo', 'from', 'status', 'min_order', 'fee', 'created_at']);
+        $payment_methods = PaymentMethod::when($request->has('search'), function ($query) use ($request) {
+                $query->where('pm_title', 'like', '%' . $request->search . '%');
+            })
+            ->when($request->has('static'), function ($query) use ($request) {
+                $query->where('status', 1);
+            })
+            ->orderBy('position', 'ASC')
+            ->get(['pm_title', 'pm_code', 'pm_logo', 'from', 'status', 'min_order', 'fee', 'created_at']);
 
         foreach ($payment_methods as $item) {
             if (!filter_var($item->pm_logo, FILTER_VALIDATE_URL)) {
                 // $file_path = storage_path('app/public' . $item->pm_logo);
                 // if (file_exists($file_path)) {
-                    // $file_url = asset('storage' . $item->pm_logo);
-                    $file_url = env('ADMIN_DOMAIN') .  $item->pm_logo;
-                    $item->pm_logo = $file_url;
+                // $file_url = asset('storage' . $item->pm_logo);
+                $file_url = env('ADMIN_DOMAIN') .  $item->pm_logo;
+                $item->pm_logo = $file_url;
                 // } else {
                 //     $item->pm_logo = null;
                 // }
@@ -73,7 +73,7 @@ class PaymentMethodController extends ApiController
             'min_order' => 'required',
             'fee' => 'required',
         ]);
-        
+
         if ($validator->fails()) {
             return $this->sendError(1, 'Params not complete', $this->validationMessage($validator->errors()));
         }
@@ -82,7 +82,7 @@ class PaymentMethodController extends ApiController
         if (!$pg) {
             return $this->sendError(1, "Gagal menambah data!", ["Kode payment gateway yang dipilih tidak ada!"]);
         }
-        
+
         $validated = $validator->validated();
         // $pm_code = generateFiledCode('PM');
         // $validated['pm_code'] = $pm_code;
@@ -110,7 +110,7 @@ class PaymentMethodController extends ApiController
     public function show($id)
     {
         $payment_method = PaymentMethod::where('pm_code', $id)->first();
-        
+
         if (!$payment_method) {
             return $this->sendError(1, "Data tidak ditemukan", []);
         }
@@ -141,7 +141,7 @@ class PaymentMethodController extends ApiController
             'fee' => 'required',
             'from' => 'required',
         ]);
-        
+
         if ($validator->fails()) {
             return $this->sendError(1, 'Params not complete', $this->validationMessage($validator->errors()));
         }
@@ -149,14 +149,14 @@ class PaymentMethodController extends ApiController
         $payment_method = PaymentMethod::where('pm_code', $id)->first();
 
         if (!$payment_method) {
-            return $this->sendError(1, "Data tidak ditemukan!", []);   
+            return $this->sendError(1, "Data tidak ditemukan!", []);
         }
 
         $pg = PaymentGateway::where('pg_code', $request->from)->first();
         if (!$pg) {
             return $this->sendError(1, "Kode payment gateway yang dipilih tidak ada!", []);
         }
-        
+
         $validated = $validator->validated();
         // $pm_code = generateFiledCode('PM');
         // $validated['pm_code'] = $pm_code;
@@ -177,7 +177,6 @@ class PaymentMethodController extends ApiController
         } else {
             return $this->sendError(1, "Gagal mengubah data!", []);
         }
-        
     }
 
     /**
@@ -189,11 +188,11 @@ class PaymentMethodController extends ApiController
     public function destroy($id)
     {
         $payment_method = PaymentMethod::where('pm_code', $id)->first();
-        
+
         if (!$payment_method) {
             return $this->sendError(1, "Data tidak ditemukan", []);
         }
-        
+
         $result = $payment_method->delete();
 
         if (Storage::exists('public' . $payment_method->pm_logo)) {
@@ -212,7 +211,7 @@ class PaymentMethodController extends ApiController
         $validator = $this->validateThis($request, [
             'status' => 'required'
         ]);
-        
+
         if ($validator->fails()) {
             return $this->sendError(1, 'Params not complete', $this->validationMessage($validator->errors()));
         }
@@ -236,5 +235,31 @@ class PaymentMethodController extends ApiController
             ];
             return $this->sendError(1, "Gagal mengubah status!", $data);
         }
+    }
+
+    public function reorderPaymentMethod(Request $request)
+    {
+        $validator = $this->validateThis($request, [
+            'from' => 'required',
+            'to' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return $this->sendError(1, 'Params not complete', $this->validationMessage($validator->errors()));
+        }
+
+        $from = $request->from;
+        $to = $request->to;
+
+        $pm_first = PaymentMethod::where('position', $from)->first();
+        $pm_to = PaymentMethod::where('position', $to)->first();
+        if (!$pm_first || !$pm_to) {
+            return $this->sendError(1, "Data tidak ditemukan!", []);
+        }
+
+        $swap = $pm_first->update(['position' => $to]);
+        $move = $pm_to->update(['position' => $from]);
+
+        return $this->sendResponse(0, "Berhasil mengubah posisi!", [$swap, $move]);
     }
 }
