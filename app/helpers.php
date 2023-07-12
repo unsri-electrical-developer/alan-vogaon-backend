@@ -122,9 +122,9 @@ if (!function_exists('getImage')) {
     {
         if (empty($file)) {
             if ($icon) {
-                return asset('/images/icon.png');
+                return asset('/image/icon.png');
             }
-            return asset('/images/default.png');
+            return asset('/def/default.png');
         }
         return env('ADMIN_DOMAIN') . $file;
     }
