@@ -28,6 +28,16 @@ class UserController extends ApiController
             ->orWhere('no_telp', 'like', '%' . $request->search . '%');
         });
       })
+      ->when($request->has('level'), function ($query) use ($request) {
+        $query->where('memberType', $request->level);
+      })
+      ->when($request->has('status'), function ($query) use ($request) {
+        $status = 1;
+        if ($request->status == 'nonaktif') {
+          $status = 0;
+        }
+        $query->where('isActive', $status);
+      })
       ->where('is_delete', 0)
       ->leftjoin('users_balance', 'users.users_code', '=', 'users_balance.users_code')
       ->get(['users.users_code', 'users.name', 'users.email', 'users.no_telp', 'users.users_profile_pic', 'users.isSuspend', 'users.created_at', 'users.memberType', 'users.isActive', 'users.isSetPin', 'users_balance.users_balance']);
