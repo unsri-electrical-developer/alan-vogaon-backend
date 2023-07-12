@@ -18,5 +18,8 @@ class About extends Model
         'meta_title',
         'meta_keyword',
         'maintenance_mode',
+        'logo',
+        'favicon',
+        'footer_logo'
     ];
 }

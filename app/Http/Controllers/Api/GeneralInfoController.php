@@ -15,7 +15,10 @@ class GeneralInfoController extends ApiController
 
     public function getGeneralInfo()
     {
-        $about = About::first(['body', 'meta_title', 'meta_desc', 'meta_keyword', 'maintenance_mode']);
+        $about = About::first(['body', 'meta_title', 'meta_desc', 'meta_keyword', 'maintenance_mode', 'logo as logo_old', 'favicon as favicon_old', 'footer_logo as footer_logo_old']);
+        $about->logo_preview = getImage($about->logo_old);
+        $about->favicon_preview = getImage($about->favicon_old);
+        $about->footer_logo_preview = getImage($about->footer_logo_old);
 
         $contact = Contact::all(['contact_code', 'contact_name', 'contact_url']);
         // $contact_arr = [];
@@ -41,10 +44,29 @@ class GeneralInfoController extends ApiController
     public function setGeneralInfo(Request $request)
     {
         if ($request->has('about')) {
-            About::updateOrCreate(
-                ['about_code' => 'about'],
-                ['body' => $request->about['body'], 'meta_title' => $request->about['meta_title'], 'meta_desc' => $request->about['meta_desc'], 'meta_keyword' => $request->about['meta_keyword']],
-            );
+            $datatoupdate = [
+                'body' => $request->about['body'],
+                'meta_title' => $request->about['meta_title'],
+                'meta_desc' => $request->about['meta_desc'],
+                'meta_keyword' => $request->about['meta_keyword'],
+            ];
+
+            if (isset($request->about['logo'])) {
+                $logo = uploadFotoWithFileName($request->about['logo'], 'LOGO', '/logo');
+                $datatoupdate['logo'] = $logo;
+            }
+
+            if (isset($request->about['favicon'])) {
+                $favicon = uploadFotoWithFileName($request->about['favicon'], 'FAV', '/logo');
+                $datatoupdate['favicon'] = $favicon;
+            }
+
+            if (isset($request->about['footer_logo'])) {
+                $footer_logo = uploadFotoWithFileName($request->about['footer_logo'], 'FL', '/logo');
+                $datatoupdate['footer_logo'] = $footer_logo;
+            }
+
+            About::where('about_code', 'about')->update($datatoupdate);
         }
 
         if ($request->has('contact')) {
